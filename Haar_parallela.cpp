@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -134,19 +133,3 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> bf6338557dfcbb436924db71982a2938fe89503d

@@ -8,7 +8,7 @@ haar:
 	$(CC) Haar_parallela.cpp -o haar_parallela $(CFLAGS)
 	
 haar_serial:
-	$(CC) Haar_serial.cpp -o haar_serial $(CFLAGS)
+	$(CC) Haar_seriale.cpp -o haar_seriale $(CFLAGS)
 
 CDF_9_7_seriale: 
 	$(CC) CDF_9_7_seriale.cpp -o cdf_9_7_seriale $(CFLAGS)

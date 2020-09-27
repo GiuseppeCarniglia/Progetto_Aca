@@ -97,7 +97,7 @@ int main()
 
 	compression_params.push_back(60);
 
-	imwrite("./immagini/immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela.jpg",new_image,compression_params);
+	imwrite("./immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela.jpg",new_image,compression_params);
 
 	waitKey(0);
 

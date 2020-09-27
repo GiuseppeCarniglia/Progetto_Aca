@@ -90,8 +90,8 @@ int main() {
 
 	compression_params.push_back(60);
 
-	imwrite("./immagini/immagini_modificate/Haar_parallela/Haar_parallela.jpg",image,compression_params);
-	imwrite("./immagini/immagini_modificate/Haar_parallela/Haar_parallela_antitrasformata.jpg",Haar_antitrasformata(image),compression_params);
+	imwrite("./immagini_modificate/Haar_parallela/Haar_parallela.jpg",image,compression_params);
+	imwrite("./immagini_modificate/Haar_parallela/Haar_parallela_antitrasformata.jpg",Haar_antitrasformata(image),compression_params);
 	
 	waitKey(0);
 	return 0;

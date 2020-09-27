@@ -180,7 +180,7 @@ int main(int argv, char *argc[])
 
 	compression_params.push_back(60);
 
-	imwrite("./immagini/immagini_modificate/CDF_9_7_seriale/CDF_9_7_seriale.jpg",new_image,compression_params);
+	imwrite("./immagini_modificate/CDF_9_7_seriale/CDF_9_7_seriale.jpg",new_image,compression_params);
 	waitKey(0);
 
 	return 0;

@@ -90,9 +90,15 @@ int main()
 	
 	printf("time %lf\n", final_time);
 
-	if(new_image.cols>=1920 || new_image.rows >=1080)
-		resize(new_image,new_image,Size(1920,1080));
-	imshow("Display Window",new_image);
+
+	vector<int> compression_params;
+
+	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+
+	compression_params.push_back(60);
+
+	imwrite("./immagini/immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela.jpg",new_image,compression_params);
+
 	waitKey(0);
 
 	return 0;

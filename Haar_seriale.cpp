@@ -46,7 +46,6 @@ int main() {
 	int temp_col = 0;
 
 	initial_time = omp_get_wtime();
-	//do {
 	
 	int i=0;
 	int j=0;
@@ -75,7 +74,6 @@ int main() {
 				image.at<uchar>(i, j) = dst.at<uchar>(i, j);
 			}
 		}
-		//w = w / 2;
 		
 
 
@@ -92,10 +90,7 @@ int main() {
 		for (int j = 0; j < temp_row; j++) {
 			image.at<uchar>(j, i) = dst.at<uchar>(j,i);
 		}
-		// //w = w / 2;
 	}
-	//iteration++;
-//}while (iteration < max_iteration);
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
 	free(a);
@@ -117,23 +112,10 @@ int main() {
 
 	compression_params.push_back(60);
 
-	imwrite("./immagini/immagini_modificate/Haar.jpg",image,compression_params);
+	imwrite("./immagini/immagini_modificate/Haar_seriale/Haar_seriale.jpg",image,compression_params);
 	
-	imwrite("./immagini/immagini_modificate/Haar_antitransform.jpg",antitransform,compression_params);
-	imwrite("./immagini/immagini_modificate/Haar_difference.jpg",image_difference,compression_params);
-
-	if(image.cols>=1920 || image.rows>=1080){
-		resize(image,image, Size(1920,1080));
-		resize(image_original,image_original,Size(1920,1080));
-		resize(antitransform,antitransform,Size(1920,1080));
-		resize(image_difference,image_difference,Size(1920,1080));
-	}
-
-	
-	imshow("Image original", image_original);
-	imshow("Image transformed", image);
-	imshow("Antitrasformata Haar",antitransform);
-	imshow("Differenza immagini", image_difference);
+	imwrite("./immagini/immagini_modificate/Haar_seriale/Haar_seriale_antitrasformata.jpg",antitransform,compression_params);
+	imwrite("./immagini/immagini_modificate/Haar_seriale/Haar_seriale_difference.jpg",image_difference,compression_params);
 
 	waitKey(0);
 	

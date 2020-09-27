@@ -84,13 +84,14 @@ int main() {
 	final_time -= initial_time;
 	printf("time: %lf \n", final_time);
 	
-	if(image.cols>=1920 || image.rows>=1080)
-		resize(image,image, Size(1920,1080));
-	
-	imshow("Display Window", image);
-	
-	imshow("Antitrasformata Haar",Haar_antitrasformata(image));
-	
+	vector<int> compression_params;
+
+	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+
+	compression_params.push_back(60);
+
+	imwrite("./immagini/immagini_modificate/Haar_parallela/Haar_parallela.jpg",image,compression_params);
+	imwrite("./immagini/immagini_modificate/Haar_parallela/Haar_parallela_antitrasformata.jpg",Haar_antitrasformata(image),compression_params);
 	
 	waitKey(0);
 	return 0;
@@ -127,7 +128,7 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 	}
 	return image_out_2;
 	
-	}
+}
 
 
 

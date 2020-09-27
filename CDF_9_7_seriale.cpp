@@ -174,7 +174,13 @@ int main(int argv, char *argc[])
 	
 	printf("time %lf\n", final_time);
 
-	imshow("Display Window",new_image);
+	vector<int> compression_params;
+
+	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+
+	compression_params.push_back(60);
+
+	imwrite("./immagini/immagini_modificate/CDF_9_7_seriale/CDF_9_7_seriale.jpg",new_image,compression_params);
 	waitKey(0);
 
 	return 0;

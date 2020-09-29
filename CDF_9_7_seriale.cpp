@@ -31,10 +31,10 @@ int main(int argv, char *argc[])
 	int imageHeight = image.size().height;
 	int w = 0;
 	uchar *a;
-	a = (uchar*)malloc(imageWidth*imageHeight * sizeof(uchar));
+	a = (uchar*)malloc(imageWidth*sizeof(uchar));
 	
 	uchar *d;
-	d = (uchar*)malloc(imageWidth*imageHeight * sizeof(uchar));
+	d = (uchar*)malloc(imageWidth*sizeof(uchar));
 	double coefficientsLP[5] = { 0.602949018236,0.266864118443,-0.078223266529,-0.016864118443,0.26748757411 };
 	double coefficientsHP[5] = { 1.11508705, -0.59127176314, -0.057543526229, 0.091271763114, 0.0 };
 	int padding[3] = { (w / 2) - 2 ,(w / 2) - 1 ,(w / 2) };

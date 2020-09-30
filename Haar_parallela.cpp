@@ -44,7 +44,7 @@ int main() {
 	initial_time = omp_get_wtime();
 	
 			//immagine A e D			
-			omp_set_num_threads(8);
+			omp_set_num_threads(omp_get_max_threads());
 			
 			#pragma omp parallel for private(i,j) schedule(static)
 				for (i = 0; i < temp_row; i++) 

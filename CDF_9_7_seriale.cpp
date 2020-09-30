@@ -282,11 +282,12 @@ for (i = 0; i < image.cols ; i++) {
 		}
 	}
 
-			
-	free(a);
-	free(d);
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
+
+	free(a);
+	free(d);
+
 	
 	printf("time %lf\n", final_time);
 

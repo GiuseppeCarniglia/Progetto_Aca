@@ -1,5 +1,3 @@
-
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -165,7 +163,125 @@ int main(int argv, char *argc[])
 		}
 	}
 
-			
+	w = imageHeight;
+
+	for (i = 0; i < image.cols ; i++) {
+		
+		//Calcolo matrice di approssimazione aa e da
+		a[0] = coefficientsLP[0] * image.at<uchar>(0,i) 
+			+ coefficientsLP[1] * (image.at<uchar>(1,i) + ZERO_VALUE)
+			+ coefficientsLP[2] * (image.at<uchar>(2,i) + ZERO_VALUE)
+			+ coefficientsLP[3] * (image.at<uchar>(3,i) + ZERO_VALUE)
+			+ coefficientsLP[4] * (image.at<uchar>(4,i) + ZERO_VALUE);
+
+		a[1] = coefficientsLP[0] * image.at<uchar>(2,i) 
+			+ coefficientsLP[1] * (image.at<uchar>(3,i) + image.at<uchar>(1,i))
+			+ coefficientsLP[2] * (image.at<uchar>(4,i) + image.at<uchar>(0,i))
+			+ coefficientsLP[3] * (image.at<uchar>(5,i) + ZERO_VALUE)
+			+ coefficientsLP[4] * (image.at<uchar>(6,i) + ZERO_VALUE);
+
+		a[2] = coefficientsLP[0] * image.at<uchar>(4,i) 
+			+ coefficientsLP[1] * (image.at<uchar>(5,i) + image.at<uchar>(3,i))
+			+ coefficientsLP[2] * (image.at<uchar>(6,i) + image.at<uchar>(2,i))
+			+ coefficientsLP[3] * (image.at<uchar>(7,i) + image.at<uchar>(1,i))
+			+ coefficientsLP[4] * (image.at<uchar>(8,i) + image.at<uchar>(0,i));
+
+
+			for (j = 3; j < (w/2) - 2; j++) {
+
+				a[j] = coefficientsLP[0] * image.at<uchar>(2*j,i)
+					+ coefficientsLP[1] * (image.at<uchar>(2*j + 1,i) + image.at<uchar>(2*j - 1,i))
+					+ coefficientsLP[2] * (image.at<uchar>(2*j + 2,i) + image.at<uchar>(2*j - 2,i))
+					+ coefficientsLP[3] * (image.at<uchar>(2*j + 3,i) + image.at<uchar>(2*j - 3,i))
+					+ coefficientsLP[4] * (image.at<uchar>(2*j + 4,i) + image.at<uchar>(2*j - 4,i));
+			}
+
+		a[padding[0]] = coefficientsLP[0] * image.at<uchar>(2 * padding[0],i)
+			+ coefficientsLP[1] * (image.at<uchar>(2 * padding[0] + 1,i) 
+			+ image.at<uchar>(2 * padding[0] - 1,i))
+			+ coefficientsLP[2] * (image.at<uchar>(2 * padding[0] + 2,i) 
+			+ image.at<uchar>(2 * padding[0] - 2,i))
+			+ coefficientsLP[3] * (image.at<uchar>(2 * padding[0] + 3,i) 
+			+ image.at<uchar>(2 * padding[0] - 3,i))
+			+ coefficientsLP[4] * (ZERO_VALUE + image.at<uchar>(2 * padding[0] - 4,i));
+
+		a[padding[1]] = coefficientsLP[0] * image.at<uchar>(2 * padding[1],i)
+			+ coefficientsLP[1] * (image.at<uchar>(2 * padding[1] + 1,i) 
+			+ image.at<uchar>(2 * padding[1] - 1,i))
+			+ coefficientsLP[2] * (ZERO_VALUE + image.at<uchar>(2 * padding[1] - 2,i))
+			+ coefficientsLP[3] * (ZERO_VALUE + image.at<uchar>(2 * padding[1] - 3,i))
+			+ coefficientsLP[4] * (ZERO_VALUE + image.at<uchar>(2 * padding[1] - 4,i));
+
+		a[padding[2]] = ZERO_VALUE
+			+ coefficientsLP[1] * (ZERO_VALUE + image.at<uchar>(2 * padding[2] - 1,i))
+			+ coefficientsLP[2] * (ZERO_VALUE + image.at<uchar>(2 * padding[2] - 2,i))
+			+ coefficientsLP[3] * (ZERO_VALUE + image.at<uchar>(2 * padding[2] - 3,i))
+			+ coefficientsLP[4] * (ZERO_VALUE + image.at<uchar>(2 * padding[2] - 4,i));
+		
+		
+		for(j = 0; j < (w/2) ; j++) {
+				new_image.at<uchar>(i, j) = a[j];
+			}
+		}
+
+for (i = 0; i < image.cols ; i++) {
+
+		//Calcolo matrice di dettaglio da e dd
+		 d[0] = coefficientsHP[0] * image.at<uchar>(0,i)
+			 + coefficientsHP[1] * (image.at<uchar>(1,i) + ZERO_VALUE)
+			 + coefficientsHP[2] * (image.at<uchar>(2,i) + ZERO_VALUE)
+			 + coefficientsHP[3] * (image.at<uchar>(3,i) + ZERO_VALUE)
+			 + coefficientsHP[4] * (image.at<uchar>(4,i) + ZERO_VALUE);
+
+		 d[1] = coefficientsHP[0] * image.at<uchar>(2,i)
+			 + coefficientsHP[1] * (image.at<uchar>(3,i) + image.at<uchar>(1,i))
+			 + coefficientsHP[2] * (image.at<uchar>(4,i) + image.at<uchar>(0,i))
+			 + coefficientsHP[3] * (image.at<uchar>(5,i) + ZERO_VALUE)
+			 + coefficientsHP[4] * (image.at<uchar>(6,i) + ZERO_VALUE);
+
+		d[2] = coefficientsHP[0] * image.at<uchar>(4,i)
+			+ coefficientsHP[1] * (image.at<uchar>(5,i) + image.at<uchar>(3,i))
+			+ coefficientsHP[2] * (image.at<uchar>(6,i) + image.at<uchar>(2,i))
+			+ coefficientsHP[3] * (image.at<uchar>(7,i) + image.at<uchar>(1,i))
+			+ coefficientsHP[4] * (image.at<uchar>(8,i) + image.at<uchar>(0,i));
+
+		
+		for (j = 3; j < (w/2) - 2; j++) {
+			 d[j] = coefficientsHP[0] * image.at<uchar>(2*j,i)
+				+ coefficientsHP[1] * (image.at<uchar>(2*j + 1,i)+image.at<uchar>(2*j - 1,i))
+				+ coefficientsHP[2] * (image.at<uchar>(2*j + 2,i)+image.at<uchar>(2*j - 2,i))
+				+ coefficientsHP[3] * (image.at<uchar>(2*j + 3,i)+image.at<uchar>(2*j - 3,i))
+				+ coefficientsHP[4] * (image.at<uchar>(2*j + 4,i)+image.at<uchar>(2*j - 4,i));
+		}
+		
+		d[padding[0]] = coefficientsHP[0] * image.at<uchar>(2*padding[0],i)
+			+ coefficientsHP[1] * (image.at<uchar>(2*padding[0]+1,i) 
+				+ image.at<uchar>(2*padding[0]-1,i))
+			+ coefficientsHP[2] * (image.at<uchar>(2*padding[0]+2,i) 
+				+ image.at<uchar>(2*padding[0]-2,i))
+			+ coefficientsHP[3] * (image.at<uchar>(2*padding[0]+3,i) 
+				+ image.at<uchar>(2*padding[0]-3,i))
+			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[0]-4,i));
+		
+		d[padding[1]] = coefficientsHP[0] * image.at<uchar>(2*padding[1],i)
+			+ coefficientsHP[1] * (image.at<uchar>(2*padding[1]+1,i)
+				+ image.at<uchar>(2*padding[1]-1,i))
+			+ coefficientsHP[2] * (image.at<uchar>(2*padding[1]+2,i)
+				+ image.at<uchar>(2*padding[1]-2,i))
+			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(2*padding[1]-3,i))
+			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[1]-4,i));
+		
+		d[padding[2]] = coefficientsHP[0] * image.at<uchar>(2*padding[2],i)
+			+ coefficientsHP[1] * (image.at<uchar>(2*padding[2]+1,i)+image.at<uchar>(2*padding[2]-1,i))
+			+ coefficientsHP[2] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-2,i))
+			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-3,i))
+			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-4,i));
+		
+		for(k = 0; k<(w/2); k++) {
+			new_image.at<uchar>(i,k+(w/2)) = d[k];
+		}
+	}
+
 			
 	free(a);
 	free(d);

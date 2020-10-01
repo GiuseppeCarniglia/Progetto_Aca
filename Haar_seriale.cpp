@@ -34,13 +34,7 @@ int main() {
 	int imageWidth = image.size().width;
 	int w = 0;
 	int k = 0;
-	uchar* a;
-	a = (uchar*)malloc(image.cols * sizeof(uchar));
 
-	uchar* d;
-	d = (uchar*)malloc(image.cols * sizeof(uchar));
-	int iteration = 0; //numero deell'iterazione corrente
-	int max_iteration = 2;//massimo numero di iterazioni, se vuoi farglielo fare più di una volta aumenta questo valore
 	double initial_time = 0, final_time = 0;
 	int temp_row = 0;
 	int temp_col = 0;
@@ -53,27 +47,26 @@ int main() {
 	temp_row = (image.rows / pow(2, iteration));
 	temp_col = (image.cols / pow(2, iteration));
 
-			//immagine A e D
-			for (i = 0; i < temp_row; i++)
-			{
-			w = (image.cols / pow(2, iteration));
+	//immagine A e D
+	for (i = 0; i < temp_row; i++)
+	{
+		w = (image.cols / pow(2, iteration));
 
-				for (j = 0; j < w / 2; j++) {
-					dst.at<uchar>(i,j) = (image.at<uchar>(i, j + j) + image.at<uchar>(i, j + j + 1)) / 2;
-
-				}
-				for (j = 0; j < w/2; j++) {
-					dst.at<uchar>(i,j+(w/2)) = (image.at<uchar>(i, j +j) - image.at<uchar>(i, j+j+1))/2;
-				}
-
-			}
-
-
-		for (int i = 0; i < temp_row; i++) {
-			for (int j = 0; j < temp_col; j++) {
-				image.at<uchar>(i, j) = dst.at<uchar>(i, j);
-			}
+		for (j = 0; j < w / 2; j++) {
+			dst.at<uchar>(i,j) = (image.at<uchar>(i, j + j) + image.at<uchar>(i, j + j + 1)) / 2;
 		}
+		for (j = 0; j < w/2; j++) {
+			dst.at<uchar>(i,j+(w/2)) = (image.at<uchar>(i, j +j) - image.at<uchar>(i, j+j+1))/2;
+		}
+
+	}
+
+
+	for (int i = 0; i < temp_row; i++) {
+		for (int j = 0; j < temp_col; j++) {
+			image.at<uchar>(i, j) = dst.at<uchar>(i, j);
+		}
+	}
 
 
 
@@ -93,8 +86,6 @@ int main() {
 	}
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
-	free(a);
-	free(d);
 	printf("time: %lf \n", final_time);
 
 
@@ -131,6 +122,7 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 	int k = immagine_trasformata.rows;
 	int w = immagine_trasformata.cols;
 	int i=0, j=0;
+
 	for(i=0;i<k/2;i++){
 		for(j=0;j<w;j++){
 			image_out.at<uchar>(2*i,j) = immagine_trasformata.at<uchar>(i,j) + immagine_trasformata.at<uchar>(i+(k/2),j);
@@ -139,8 +131,6 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 
 		}
 	}
-
-
 
 	for(i=0;i<k;i++){
 		for(j=0;j<w/2;j++){
@@ -152,15 +142,13 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 	}
 
 	return image_out_2;
-
-	}
+}
 
 
 Mat diff_of_images(Mat original, Mat antitransform){
 
 	if(original.cols != antitransform.cols || original.rows != antitransform.rows){
 		perror("Images of different sizes");
-
 	}
 
 	Mat image_diff = cv::Mat(original.rows, original.cols, CV_8UC1);

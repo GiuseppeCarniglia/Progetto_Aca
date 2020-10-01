@@ -43,27 +43,27 @@ int main() {
 	
 	initial_time = omp_get_wtime();
 	
-			//immagine A e D			
-			omp_set_num_threads(omp_get_max_threads());
+	//immagine A e D			
+	omp_set_num_threads(omp_get_max_threads());
+	
+	#pragma omp parallel for private(i,j) schedule(static)
+	for (i = 0; i < temp_row; i++) 
+	{
+		for (int j = 0; j < w/2; j++) {
+			dst.at<uchar>(i, j) = (image.at<uchar>(i,2*j) + image.at<uchar>(i,2*j + 1)) / 2;
 			
-			#pragma omp parallel for private(i,j) schedule(static)
-				for (i = 0; i < temp_row; i++) 
-				{
-					for (int j = 0; j < w/2; j++) {
-						dst.at<uchar>(i, j) = (image.at<uchar>(i,2*j) + image.at<uchar>(i,2*j + 1)) / 2;
-						
-						dst.at<uchar>(i, j+(w/2)) = (image.at<uchar>(i,2*j) - image.at<uchar>(i,2*j+1))/2;
-					}
-					
-					printf("N Threads. %d, Thread ID %d\n",omp_get_num_threads(), omp_get_thread_num());
-				}
-					
+			dst.at<uchar>(i, j+(w/2)) = (image.at<uchar>(i,2*j) - image.at<uchar>(i,2*j+1))/2;
+		}
 		
-			for (int i = 0; i < temp_row; i++) {
-				for (int j = 0; j < temp_col; j++) {
-					image.at<uchar>(i, j) = dst.at<uchar>(i, j);
-				}
-			}
+		printf("N Threads. %d, Thread ID %d\n",omp_get_num_threads(), omp_get_thread_num());
+	}
+			
+	#pragma omp for private(i,j) schedule(static)
+	for (int i = 0; i < temp_row; i++) {
+		for (int j = 0; j < temp_col; j++) {
+			image.at<uchar>(i, j) = dst.at<uchar>(i, j);
+		}
+	}
 	
 	#pragma omp parallel for private(i,j) schedule(static)
 	for (int i = 0; i < w; i++) {		
@@ -109,6 +109,7 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 	int w = immagine_trasformata.cols;
  	int i,j;	
 
+	#pragma omp parallel for private(i,j) schedule(static)
 	for(i=0;i<k/2;i++){
 		for(j=0;j<w;j++){
 			image_out.at<uchar>(2*i,j) = immagine_trasformata.at<uchar>(i,j) + immagine_trasformata.at<uchar>(i+(k/2),j);
@@ -118,6 +119,7 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 		}
 	}
 	
+	#pragma omp parallel for private(i,j) schedule(static)
 	for(i=0;i<k;i++){
 		for(j=0;j<w/2;j++){
 			image_out_2.at<uchar>(i,2*j) = image_out.at<uchar>(i,j) + image_out.at<uchar>(i,j+(w/2));

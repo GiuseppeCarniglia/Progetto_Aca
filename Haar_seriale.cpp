@@ -44,13 +44,13 @@ int main() {
 	int i=0;
 	int j=0;
 
-	temp_row = (image.rows / 2);
-	temp_col = (image.cols / 2);
+	temp_row = (image.rows);
+	temp_col = (image.cols);
 
 	//immagine A e D
 	for (i = 0; i < temp_row; i++)
 	{
-		w = (image.cols / 2);
+		w = (image.cols);
 
 		for (j = 0; j < w / 2; j++) {
 			dst.at<uchar>(i,j) = (image.at<uchar>(i, j + j) + image.at<uchar>(i, j + j + 1)) / 2;
@@ -71,7 +71,7 @@ int main() {
 
 
 	for (int i = 0; i < temp_col; i++) {
-		w = (image.rows / 2);
+		w = (image.rows);
 		k = 0;
 
 		for (int j = 0; j < w / 2; j++) {
@@ -88,7 +88,6 @@ int main() {
 	final_time -= initial_time;
 	printf("time: %lf \n", final_time);
 
-
 	antitransform = Haar_antitrasformata(image);
 	image_difference = diff_of_images(image_original, antitransform);
 
@@ -99,7 +98,7 @@ int main() {
 
 	vector<int> compression_params;
 
-	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 
 	compression_params.push_back(60);
 

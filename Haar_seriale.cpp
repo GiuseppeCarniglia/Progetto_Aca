@@ -1,6 +1,6 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 #include <iostream>
 #include <math.h>
 
@@ -44,13 +44,13 @@ int main() {
 	int i=0;
 	int j=0;
 
-	temp_row = (image.rows / pow(2, iteration));
-	temp_col = (image.cols / pow(2, iteration));
+	temp_row = (image.rows / 2);
+	temp_col = (image.cols / 2);
 
 	//immagine A e D
 	for (i = 0; i < temp_row; i++)
 	{
-		w = (image.cols / pow(2, iteration));
+		w = (image.cols / 2);
 
 		for (j = 0; j < w / 2; j++) {
 			dst.at<uchar>(i,j) = (image.at<uchar>(i, j + j) + image.at<uchar>(i, j + j + 1)) / 2;
@@ -71,7 +71,7 @@ int main() {
 
 
 	for (int i = 0; i < temp_col; i++) {
-		w = (image.rows / pow(2, iteration));
+		w = (image.rows / 2);
 		k = 0;
 
 		for (int j = 0; j < w / 2; j++) {

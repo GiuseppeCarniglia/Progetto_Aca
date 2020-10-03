@@ -105,7 +105,7 @@ int main() {
 	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale.jpg",image,compression_params);
 
 	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_antitrasformata.jpg",antitransform,compression_params);
-	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_difference.jpg",image_difference,compression_params);
+	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_differenza.jpg",image_difference,compression_params);
 
 	waitKey(0);
 

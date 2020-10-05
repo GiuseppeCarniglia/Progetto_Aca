@@ -83,10 +83,10 @@ int main() {
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
 	printf("time: %lf \n", final_time);
-	
+
 	vector<int> compression_params;
 
-	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 
 	compression_params.push_back(60);
 

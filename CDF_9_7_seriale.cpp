@@ -211,54 +211,54 @@ int main(int argv, char *argc[])
 
 		//Calcolo matrice di dettaglio da e dd
 		new_image.at<uchar>(0+(w/2),i) = coefficientsHP[0] * new_image.at<uchar>(0,i)
-			+ coefficientsHP[1] * (new_image.at<uchar>(1,i) + ZERO_VALUE)
-			+ coefficientsHP[2] * (new_image.at<uchar>(2,i) + ZERO_VALUE)
-			+ coefficientsHP[3] * (new_image.at<uchar>(3,i) + ZERO_VALUE)
-			+ coefficientsHP[4] * (new_image.at<uchar>(4,i) + ZERO_VALUE);
+			+ coefficientsHP[1] * (image.at<uchar>(1,i) + ZERO_VALUE)
+			+ coefficientsHP[2] * (image.at<uchar>(2,i) + ZERO_VALUE)
+			+ coefficientsHP[3] * (image.at<uchar>(3,i) + ZERO_VALUE)
+			+ coefficientsHP[4] * (image.at<uchar>(4,i) + ZERO_VALUE);
 
-		new_image.at<uchar>(1+(w/2),i) = coefficientsHP[0] * new_image.at<uchar>(2,i)
-			+ coefficientsHP[1] * (new_image.at<uchar>(3,i) + new_image.at<uchar>(1,i))
-			+ coefficientsHP[2] * (new_image.at<uchar>(4,i) + new_image.at<uchar>(0,i))
-			+ coefficientsHP[3] * (new_image.at<uchar>(5,i) + ZERO_VALUE)
-			+ coefficientsHP[4] * (new_image.at<uchar>(6,i) + ZERO_VALUE);
+		new_image.at<uchar>(1+(w/2),i) = coefficientsHP[0] * image.at<uchar>(2,i)
+			+ coefficientsHP[1] * (image.at<uchar>(3,i) + image.at<uchar>(1,i))
+			+ coefficientsHP[2] * (image.at<uchar>(4,i) + image.at<uchar>(0,i))
+			+ coefficientsHP[3] * (image.at<uchar>(5,i) + ZERO_VALUE)
+			+ coefficientsHP[4] * (image.at<uchar>(6,i) + ZERO_VALUE);
 
-		new_image.at<uchar>(2+(w/2),i) = coefficientsHP[0] * new_image.at<uchar>(4,i)
-			+ coefficientsHP[1] * (new_image.at<uchar>(5,i) + new_image.at<uchar>(3,i))
-			+ coefficientsHP[2] * (new_image.at<uchar>(6,i) + new_image.at<uchar>(2,i))
-			+ coefficientsHP[3] * (new_image.at<uchar>(7,i) + new_image.at<uchar>(1,i))
-			+ coefficientsHP[4] * (new_image.at<uchar>(8,i) + new_image.at<uchar>(0,i));
+		new_image.at<uchar>(2+(w/2),i) = coefficientsHP[0] * image.at<uchar>(4,i)
+			+ coefficientsHP[1] * (image.at<uchar>(5,i) + image.at<uchar>(3,i))
+			+ coefficientsHP[2] * (image.at<uchar>(6,i) + image.at<uchar>(2,i))
+			+ coefficientsHP[3] * (image.at<uchar>(7,i) + image.at<uchar>(1,i))
+			+ coefficientsHP[4] * (image.at<uchar>(8,i) + image.at<uchar>(0,i));
 
 		
 		for (j = 3; j < (w/2) - 2; j++) {
-			new_image.at<uchar>(j+(w/2),i) = coefficientsHP[0] * new_image.at<uchar>(2*j,i)
-				+ coefficientsHP[1] * (new_image.at<uchar>(2*j + 1,i)+new_image.at<uchar>(2*j - 1,i))
-				+ coefficientsHP[2] * (new_image.at<uchar>(2*j + 2,i)+new_image.at<uchar>(2*j - 2,i))
-				+ coefficientsHP[3] * (new_image.at<uchar>(2*j + 3,i)+new_image.at<uchar>(2*j - 3,i))
-				+ coefficientsHP[4] * (new_image.at<uchar>(2*j + 4,i)+new_image.at<uchar>(2*j - 4,i));
+			new_image.at<uchar>(j+(w/2),i) = coefficientsHP[0] * image.at<uchar>(2*j,i)
+				+ coefficientsHP[1] * (image.at<uchar>(2*j + 1,i)+image.at<uchar>(2*j - 1,i))
+				+ coefficientsHP[2] * (image.at<uchar>(2*j + 2,i)+image.at<uchar>(2*j - 2,i))
+				+ coefficientsHP[3] * (image.at<uchar>(2*j + 3,i)+image.at<uchar>(2*j - 3,i))
+				+ coefficientsHP[4] * (image.at<uchar>(2*j + 4,i)+image.at<uchar>(2*j - 4,i));
 		}
 		
-		new_image.at<uchar>(padding[0]+(w/2),i) = coefficientsHP[0] * new_image.at<uchar>(2*padding[0],i)
-			+ coefficientsHP[1] * (new_image.at<uchar>(2*padding[0]+1,i) 
-				+ new_image.at<uchar>(2*padding[0]-1,i))
-			+ coefficientsHP[2] * (new_image.at<uchar>(2*padding[0]+2,i) 
-				+ new_image.at<uchar>(2*padding[0]-2,i))
-			+ coefficientsHP[3] * (new_image.at<uchar>(2*padding[0]+3,i) 
-				+ new_image.at<uchar>(2*padding[0]-3,i))
-			+ coefficientsHP[4] * (ZERO_VALUE + new_image.at<uchar>(2*padding[0]-4,i));
+		new_image.at<uchar>(padding[0]+(w/2),i) = coefficientsHP[0] * image.at<uchar>(2*padding[0],i)
+			+ coefficientsHP[1] * (image.at<uchar>(2*padding[0]+1,i) 
+				+ image.at<uchar>(2*padding[0]-1,i))
+			+ coefficientsHP[2] * (image.at<uchar>(2*padding[0]+2,i) 
+				+ image.at<uchar>(2*padding[0]-2,i))
+			+ coefficientsHP[3] * (image.at<uchar>(2*padding[0]+3,i) 
+				+ image.at<uchar>(2*padding[0]-3,i))
+			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[0]-4,i));
 		
-		new_image.at<uchar>(padding[1]+(w/2),i) = coefficientsHP[0] * new_image.at<uchar>(2*padding[1],i)
-			+ coefficientsHP[1] * (new_image.at<uchar>(2*padding[1]+1,i)
-				+ new_image.at<uchar>(2*padding[1]-1,i))
-			+ coefficientsHP[2] * (new_image.at<uchar>(2*padding[1]+2,i)
-				+ new_image.at<uchar>(2*padding[1]-2,i))
-			+ coefficientsHP[3] * (ZERO_VALUE + new_image.at<uchar>(2*padding[1]-3,i))
-			+ coefficientsHP[4] * (ZERO_VALUE + new_image.at<uchar>(2*padding[1]-4,i));
+		new_image.at<uchar>(padding[1]+(w/2),i) = coefficientsHP[0] * image.at<uchar>(2*padding[1],i)
+			+ coefficientsHP[1] * (image.at<uchar>(2*padding[1]+1,i)
+				+ image.at<uchar>(2*padding[1]-1,i))
+			+ coefficientsHP[2] * (image.at<uchar>(2*padding[1]+2,i)
+				+ image.at<uchar>(2*padding[1]-2,i))
+			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(2*padding[1]-3,i))
+			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[1]-4,i));
 		
-		new_image.at<uchar>(padding[2]+(w/2),i) = coefficientsHP[0] * new_image.at<uchar>(2*padding[2],i)
-			+ coefficientsHP[1] * (new_image.at<uchar>(2*padding[2]+1,i)+new_image.at<uchar>(2*padding[2]-1,i))
-			+ coefficientsHP[2] * (ZERO_VALUE + new_image.at<uchar>(2*padding[2]-2,i))
-			+ coefficientsHP[3] * (ZERO_VALUE + new_image.at<uchar>(2*padding[2]-3,i))
-			+ coefficientsHP[4] * (ZERO_VALUE + new_image.at<uchar>(2*padding[2]-4,i));
+		new_image.at<uchar>(padding[2]+(w/2),i) = coefficientsHP[0] * image.at<uchar>(2*padding[2],i)
+			+ coefficientsHP[1] * (image.at<uchar>(2*padding[2]+1,i)+image.at<uchar>(2*padding[2]-1,i))
+			+ coefficientsHP[2] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-2,i))
+			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-3,i))
+			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-4,i));
 	}
 
 	final_time = omp_get_wtime();

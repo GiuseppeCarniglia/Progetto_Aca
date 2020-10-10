@@ -22,7 +22,7 @@ using namespace std;
 
 int main(int argv, char *argc[])
 {
-	const char* imgName = argc[1];
+	const char* imgName = "./immagini/leonessa.jpg";
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
 	int imageWidth = image.size().width;
 	int imageHeight = image.size().height;
@@ -132,15 +132,13 @@ int main(int argv, char *argc[])
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[0]-4));
 		
 		new_image.at<uchar>(i,padding[1]+(w/2)) = coefficientsHP[0] * image.at<uchar>(i, 2*padding[1])
-			+ coefficientsHP[1] * (image.at<uchar>(i, 2*padding[1]+1)
-				+ image.at<uchar>(i, 2*padding[1]-1))
-			+ coefficientsHP[2] * (image.at<uchar>(i, 2*padding[1]+2)
-				+ image.at<uchar>(i, 2*padding[1]-2))
+			+ coefficientsHP[1] * (image.at<uchar>(i, 2*padding[1]+1) + image.at<uchar>(i, 2*padding[1]-1))
+			+ coefficientsHP[2] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[1]-2))
 			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[1]-3))
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[1]-4));
 		
-		new_image.at<uchar>(i,padding[2]+(w/2)) = coefficientsHP[0] * image.at<uchar>(i, 2*padding[2])
-			+ coefficientsHP[1] * (image.at<uchar>(i, 2*padding[2]+1)+image.at<uchar>(i, 2*padding[2]-1))
+		new_image.at<uchar>(i,padding[2]+(w/2)) = ZERO_VALUE 
+			+ coefficientsHP[1] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[2]-1))
 			+ coefficientsHP[2] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[2]-2))
 			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[2]-3))
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(i, 2*padding[2]-4));
@@ -149,12 +147,11 @@ int main(int argv, char *argc[])
 	image = new_image.clone();
 
 	w = imageHeight;
-	
 	padding[0] = (w/2)-2;
 	padding[1] = (w/2)-1;
 	padding[2] = (w/2);
 
-	for (i = 0; i < imageWidth ; i++) {
+	for (i = 0; i < imageWidth; i++) {
 		
 		//Calcolo matrice di approssimazione aa e da
 		new_image.at<uchar>(0, i) = coefficientsLP[0] * image.at<uchar>(0,i) 
@@ -254,18 +251,16 @@ int main(int argv, char *argc[])
 			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(2*padding[1]-3,i))
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[1]-4,i));
 		
-		new_image.at<uchar>(padding[2]+(w/2),i) = coefficientsHP[0] * image.at<uchar>(2*padding[2],i)
-			+ coefficientsHP[1] * (image.at<uchar>(2*padding[2]+1,i)+image.at<uchar>(2*padding[2]-1,i))
-			+ coefficientsHP[2] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-2,i))
-			+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-3,i))
-			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(2*padding[2]-4,i));
 	}
 
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
 
 	printf("time %lf\n", final_time);
-	
+
+
+	namedWindow("CDF_seriale", WINDOW_AUTOSIZE);
+    cv::resize(new_image,new_image, cv::Size(1920,1080),0,0,cv::INTER_LINEAR);
 	imshow("CDF_seriale",new_image);
 
 //	vector<int> compression_params;

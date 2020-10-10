@@ -9,7 +9,6 @@ using namespace cv;
 using namespace std;
 
 #define ZERO_VALUE (uchar)0
-#define CHUNK_SIZE (8)
 
 /*
    
@@ -26,9 +25,9 @@ void wavelet_row(Mat src, Mat dst, double coefficients[],int offset);
 
 void wavelet_cols(Mat src,Mat dst, double coefficients[],int offset);
 
-int main()
+int main(int argc, char* argv[])
 {
-	const char* imgName = "./immagini/volto.jpg";
+	const char* imgName = argv[1];
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
 	int imageWidth = image.size().width;
 	int imageHeight = image.size().height;
@@ -42,6 +41,11 @@ int main()
 	double coefficientsHP[5] = { 1.11508705, -0.59127176314, -0.057543526229, 0.091271763114, 0.0 };
 
 	double initial_time = 0, final_time = 0;
+	
+	if(image.empty()){
+		perror("Immagine vuota\n");
+		exit(0);
+	}
 
 	initial_time = omp_get_wtime();
 	
@@ -65,11 +69,11 @@ int main()
 		{
 			#pragma omp section
 			{
-				wavelet_cols(new_image,tmp_image_1,coefficientsLP,0);
+    			wavelet_cols(new_image,tmp_image_1,coefficientsLP,0);
 			}
 			#pragma omp section
 			{
-				wavelet_cols(new_image,tmp_image_2,coefficientsHP,(imageHeight/2));
+				wavelet_cols(new_image,tmp_image_2,coefficientsHP,(imageHeight/2)-1);
 			}
 		}
 	}//end parallel
@@ -78,17 +82,25 @@ int main()
 	final_time -= initial_time;	
 	printf("time %lf\n", final_time);
 
+    //Copia di tmp_image_1 e tmp_image_2 in new_image
+    for(int i=0;i<imageWidth;i++){
+        for(int j=0;j<imageHeight/2;j++){
+            new_image.at<uchar>(j,i) = tmp_image_1.at<uchar>(j,i);
+        }
+        for(int j=imageHeight/2;j<imageHeight;j++){
+            new_image.at<uchar>(j,i) = tmp_image_2.at<uchar>(j,i);
+        }
+    }
 
-	tmp_image_1.copyTo(new_image(Rect(0,0,imageWidth,imageHeight/2)));	
-	tmp_image_2.copyTo(new_image(Rect(0,imageHeight/2,imageWidth,imageHeight)));	
+	imshow("CDF parallela",new_image);
 	
-	vector<int> compression_params;
+//	vector<int> compression_params;
 
-	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+//	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
 
-	compression_params.push_back(60);
+//	compression_params.push_back(60);
 
-	imwrite("./immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela.jpg",new_image,compression_params);
+//	imwrite("./immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela.jpg",new_image,compression_params);
 
 	waitKey(0);
 
@@ -138,7 +150,7 @@ void wavelet_row(Mat src, Mat dst, double coefficients[],int offset){
 				+ coefficients[4] * (src.at<uchar>(i, 2*j + 4) + src.at<uchar>(i, 2*j - 4));
 		}
 
-		dst.at<uchar>(i,padding[0] + offset) = coefficients[0] * src.at<uchar>(i, 2 * padding[0])
+		dst.at<uchar>(i,padding[0]+offset) = coefficients[0] * src.at<uchar>(i, 2 * padding[0])
 			+ coefficients[1] * (src.at<uchar>(i, 2 * (padding[0])+ 1) 
 			+ src.at<uchar>(i, 2 *(padding[0]) - 1))
 			+ coefficients[2] * (src.at<uchar>(i, 2 *(padding[0]) + 2) 
@@ -147,14 +159,14 @@ void wavelet_row(Mat src, Mat dst, double coefficients[],int offset){
 			+ src.at<uchar>(i, 2 *(padding[0]) - 3))
 			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[0]) - 4));
 
-		dst.at<uchar>(i,padding[1] + offset) = coefficients[0] * src.at<uchar>(i, 2 *(padding[1]))
+		dst.at<uchar>(i,padding[1]+offset)  = coefficients[0] * src.at<uchar>(i, 2 *(padding[1]))
 			+ coefficients[1] * (src.at<uchar>(i, 2 *(padding[1]) + 1) 
 			+ src.at<uchar>(i, 2 *(padding[1]) - 1))
 			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[1]) - 2))
 			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[1]) - 3))
 			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(i, 2 * (padding[1]) - 4));
 
-		dst.at<uchar>(i,padding[2] + offset) = ZERO_VALUE
+		dst.at<uchar>(i,padding[2]+offset) = ZERO_VALUE
 			+ coefficients[1] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[2]) - 1))
 			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(i, 2 * (padding[2])- 2))
 			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(i, 2 * (padding[2]) - 3))
@@ -168,10 +180,10 @@ void wavelet_cols(Mat src,Mat dst, double coefficients[],int offset){
 	int srcWidth = src.size().width;
 	int srcHeight = src.size().height;
 	
-	int padding[3] = {(srcWidth / 2) - 2 ,(srcWidth / 2) - 1 ,(srcWidth / 2)};
+	int padding[3] = {(srcHeight/ 2) - 2 ,(srcHeight/ 2) - 1 ,(srcHeight/ 2)};
 	
 	int i=0,j=0;
-	
+
 	#pragma omp parallel for private(i,j) schedule(static)
 	for (i = 0; i < srcWidth ; i++) {
 			
@@ -205,25 +217,24 @@ void wavelet_cols(Mat src,Mat dst, double coefficients[],int offset){
 
 		dst.at<uchar>(padding[0]+offset,i) = coefficients[0] * src.at<uchar>(2 * padding[0],i)
 			+ coefficients[1] * (src.at<uchar>(2 * (padding[0])+ 1,i) 
-			+ src.at<uchar>(2 *(padding[0]) - 1),i)
+			+ src.at<uchar>(2 *(padding[0]) - 1,i))
 			+ coefficients[2] * (src.at<uchar>(2 *(padding[0]) + 2,i) 
-			+ src.at<uchar>(2 *(padding[0]) - 2),i)
+			+ src.at<uchar>(2 *(padding[0]) - 2,i))
 			+ coefficients[3] * (src.at<uchar>(2 *(padding[0]) + 3,i) 
-			+ src.at<uchar>(2 *(padding[0]) - 3),i)
-			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 *(padding[0]) - 4),i);
+			+ src.at<uchar>(2 *(padding[0]) - 3,i))
+			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 *(padding[0]) - 4,i));
 
 		dst.at<uchar>(padding[1]+offset,i) = coefficients[0] * src.at<uchar>(2*(padding[1]),i)
-			+ coefficients[1] * (src.at<uchar>(2 *(padding[1]) + 1,i) 
-			+ src.at<uchar>(2 *(padding[1]) - 1),i)
-			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(2 *(padding[1]) - 2),i)
-			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(2 *(padding[1]) - 3),i)
-			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 * (padding[1]) - 4),i);
+			+ coefficients[1] * (src.at<uchar>(2 *(padding[1]) + 1,i) + src.at<uchar>(2 *(padding[1]) - 1,i))
+			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(2 *(padding[1]) - 2,i))
+			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(2 *(padding[1]) - 3,i))
+			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 * (padding[1]) - 4,i));
 
-		dst.at<uchar>(padding[2]+offset,i) = ZERO_VALUE
-			+ coefficients[1] * (ZERO_VALUE + src.at<uchar>(2 *(padding[2]) - 1),i)
-			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2])- 2),i)
-			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2]) - 3),i)
-			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2])- 4),i);
+	/*	dst.at<uchar>(padding[2]+offset,i) = ZERO_VALUE
+			+ coefficients[1] * (ZERO_VALUE + src.at<uchar>(2 *(padding[2]) - 1,i))
+			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2])- 2,i))
+			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2]) - 3,i))
+			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2])- 4,i));*/
 		}
 }
 

@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-	int i=0,j=0,offset=(imageWidth/2 - 1);
+	int i=0,j=0,offset=(imageWidth/2) - 1;
 
 
 	initial_time = omp_get_wtime();

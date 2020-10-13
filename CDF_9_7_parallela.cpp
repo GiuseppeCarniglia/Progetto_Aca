@@ -20,12 +20,6 @@ using namespace std;
  */
 
 
-
-uchar wavelet_row(Mat src,int i, int j,double coefficients[]);
-
-//void wavelet_cols(Mat src,Mat dst, double coefficients[],int offset);
-
-
 int main(int argc, char* argv[])
 {
 	const char* imgName = argv[1];
@@ -55,10 +49,11 @@ int main(int argc, char* argv[])
 
 
 	initial_time = omp_get_wtime();
-	
+    #pragma omp parallel
+    {
 		#pragma omp for private(i,j) schedule(static)
 		for (i = 0; i < imageHeight ; i++) {
-						
+
 			new_image.at<uchar>(i,0) = coefficientsLP[0] * image.at<uchar>(i,0) 
 				+ coefficientsLP[1] * (image.at<uchar>(i, 1) + ZERO_VALUE)
 				+ coefficientsLP[2] * (image.at<uchar>(i, 2) + ZERO_VALUE)
@@ -162,14 +157,15 @@ int main(int argc, char* argv[])
 				+ coefficientsHP[3] * (ZERO_VALUE + image.at<uchar>(i, 2 * (padding[2]) - 3))
 				+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(i, 2 * (padding[2]) - 4));
 		}
-		
+    }	
 		padding[0] = (imageHeight/ 2) - 2;
 		padding[1] = (imageHeight/ 2) - 1;
 		padding[2] = (imageHeight/ 2);
 		
 		offset = (imageHeight/2) - 1;
-		
-		#pragma omp parallel for private(i,j) schedule(static)
+        #pragma omp parallel
+        {
+		#pragma omp for private(i,j) schedule(static)
 		for (i = 0; i < imageWidth ; i++) {
 				
 			tmp_image_1.at<uchar>(0,i) = coefficientsLP[0] * new_image.at<uchar>(0,i) 
@@ -270,7 +266,7 @@ int main(int argc, char* argv[])
 				+ coefficientsHP[4] * (ZERO_VALUE + new_image.at<uchar>(2 * (padding[2])- 4,i));
 			}
 			
-			
+        }	
 	final_time = omp_get_wtime();
 	final_time -= initial_time;	
 	printf("time %lf\n", final_time);
@@ -285,193 +281,38 @@ int main(int argc, char* argv[])
         }
     }
     
-    	cv::resize(new_image,new_image, cv::Size(1920,1080),0,0,cv::INTER_LINEAR);
+/*    	cv::resize(new_image,new_image, cv::Size(1920,1080),0,0,cv::INTER_LINEAR);
 
-	imshow("CDF parallela",new_image);
+	imshow("CDF parallela",new_image);*/
 	
-//	vector<int> compression_params;
+	vector<int> compression_params;
 
-//	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 
-//	compression_params.push_back(60);
+	compression_params.push_back(60);
 
-//	imwrite("./immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela.jpg",new_image,compression_params);
+    char file_name[200] = "./immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela_";
+    char image_name[100]={""};
+    int pos = 0;
+    int name_length = (int)strlen(imgName);
+    for(int i=name_length;i>=0;i--){
+        if(imgName[i]== '/'){
+            pos = i+1;
+            break;
+        }
+    }
+    
+    for(int i=pos;i<name_length;i++){
+        image_name[i-pos] = imgName[i];
+    }
+    
+    strcat(file_name,image_name);
+
+    printf("%s %d %d\n",file_name, name_length, pos);
+
+	imwrite(file_name,new_image,compression_params);
 
 	waitKey(0);
 
 	return 0;
 }
-
-
-uchar wavelet_row(Mat src,int i, int j,double coefficients[]){
-	
-	uchar out=0;
-	
-	out = coefficients[0] * src.at<uchar>(i, 2*j)
-		+ coefficients[1] * (src.at<uchar>(i, 2*j + 1) + src.at<uchar>(i, 2*j - 1))
-		+ coefficients[2] * (src.at<uchar>(i, 2*j + 2) + src.at<uchar>(i, 2*j - 2))
-		+ coefficients[3] * (src.at<uchar>(i, 2*j + 3) + src.at<uchar>(i, 2*j - 3))
-		+ coefficients[4] * (src.at<uchar>(i, 2*j + 4) + src.at<uchar>(i, 2*j - 4));
-		
-	return out;
-	
-}
-
-
-
-
-
-//void wavelet_row(Mat src, Mat dst, double coefficients[],int offset){
-//	
-//	int srcWidth = src.size().width;
-//	int srcHeight = src.size().height;
-//	
-//	int padding[3] = {(srcWidth/2) - 2 ,(srcWidth/2) - 1 ,(srcWidth/2)};
-//	
-//	int i=0,j=0;
-
-//	#pragma omp parallel for private(i,j) schedule(static)
-//	for (i = 0; i < srcHeight ; i++) {
-//				
-//		printf("Thread ID:%i\n",omp_get_thread_num());
-//					
-//		dst.at<uchar>(i,0 + offset) = coefficients[0] * src.at<uchar>(i,0) 
-//			+ coefficients[1] * (src.at<uchar>(i, 1) + ZERO_VALUE)
-//			+ coefficients[2] * (src.at<uchar>(i, 2) + ZERO_VALUE)
-//			+ coefficients[3] * (src.at<uchar>(i, 3) + ZERO_VALUE)
-//			+ coefficients[4] * (src.at<uchar>(i, 4) + ZERO_VALUE);
-
-//		dst.at<uchar>(i,1 + offset) = coefficients[0] * src.at<uchar>(i, 2) 
-//			+ coefficients[1] * (src.at<uchar>(i, 3) + src.at<uchar>(i, 1))
-//			+ coefficients[2] * (src.at<uchar>(i, 4) + src.at<uchar>(i, 0))
-//			+ coefficients[3] * (src.at<uchar>(i, 5) + ZERO_VALUE)
-//			+ coefficients[4] * (src.at<uchar>(i, 6) + ZERO_VALUE);
-
-//		dst.at<uchar>(i,2 + offset) = coefficients[0] * src.at<uchar>(i, 4) 
-//			+ coefficients[1] * (src.at<uchar>(i, 5) + src.at<uchar>(i, 3))
-//			+ coefficients[2] * (src.at<uchar>(i, 6) + src.at<uchar>(i, 2))
-//			+ coefficients[3] * (src.at<uchar>(i, 7) + src.at<uchar>(i, 1))
-//			+ coefficients[4] * (src.at<uchar>(i, 8) + src.at<uchar>(i, 0));
-
-
-//		for (j = 3; j < (srcWidth/2) - 2; j++) {
-
-//			dst.at<uchar>(i,j + offset) = coefficients[0] * src.at<uchar>(i, 2*j)
-//				+ coefficients[1] * (src.at<uchar>(i, 2*j + 1) + src.at<uchar>(i, 2*j - 1))
-//				+ coefficients[2] * (src.at<uchar>(i, 2*j + 2) + src.at<uchar>(i, 2*j - 2))
-//				+ coefficients[3] * (src.at<uchar>(i, 2*j + 3) + src.at<uchar>(i, 2*j - 3))
-//				+ coefficients[4] * (src.at<uchar>(i, 2*j + 4) + src.at<uchar>(i, 2*j - 4));
-//		}
-
-//		dst.at<uchar>(i,padding[0]+offset) = coefficients[0] * src.at<uchar>(i, 2 * padding[0])
-//			+ coefficients[1] * (src.at<uchar>(i, 2 * (padding[0])+ 1) 
-//			+ src.at<uchar>(i, 2 *(padding[0]) - 1))
-//			+ coefficients[2] * (src.at<uchar>(i, 2 *(padding[0]) + 2) 
-//			+ src.at<uchar>(i, 2 *(padding[0]) - 2))
-//			+ coefficients[3] * (src.at<uchar>(i, 2 *(padding[0]) + 3) 
-//			+ src.at<uchar>(i, 2 *(padding[0]) - 3))
-//			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[0]) - 4));
-
-//		dst.at<uchar>(i,padding[1]+offset)  = coefficients[0] * src.at<uchar>(i, 2 *(padding[1]))
-//			+ coefficients[1] * (src.at<uchar>(i, 2 *(padding[1]) + 1) 
-//			+ src.at<uchar>(i, 2 *(padding[1]) - 1))
-//			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[1]) - 2))
-//			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[1]) - 3))
-//			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(i, 2 * (padding[1]) - 4));
-
-//		dst.at<uchar>(i,padding[2]+offset) = ZERO_VALUE
-//			+ coefficients[1] * (ZERO_VALUE + src.at<uchar>(i, 2 *(padding[2]) - 1))
-//			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(i, 2 * (padding[2])- 2))
-//			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(i, 2 * (padding[2]) - 3))
-//			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(i, 2 * (padding[2])- 4));
-//	}
-//}
-
-
-//void wavelet_cols(Mat src,Mat dst, double coefficients[],int offset){
-
-//	int srcWidth = src.size().width;
-//	int srcHeight = src.size().height;
-//	
-//	int padding[3] = {(srcHeight/ 2) - 2 ,(srcHeight/ 2) - 1 ,(srcHeight/ 2)};
-//	
-//	int i=0,j=0;
-
-//	#pragma omp parallel for private(i,j) schedule(static)
-//	for (i = 0; i < srcWidth ; i++) {
-//			
-//		dst.at<uchar>(0+offset,i) = coefficients[0] * src.at<uchar>(0,i) 
-//			+ coefficients[1] * (src.at<uchar>(1,i) + ZERO_VALUE)
-//			+ coefficients[2] * (src.at<uchar>(2,i) + ZERO_VALUE)
-//			+ coefficients[3] * (src.at<uchar>(3,i) + ZERO_VALUE)
-//			+ coefficients[4] * (src.at<uchar>(4,i) + ZERO_VALUE);
-
-//		dst.at<uchar>(1+offset,i) = coefficients[0] * src.at<uchar>(2,i) 
-//			+ coefficients[1] * (src.at<uchar>(3,i) + src.at<uchar>(1,i))
-//			+ coefficients[2] * (src.at<uchar>(4,i) + src.at<uchar>(0,i))
-//			+ coefficients[3] * (src.at<uchar>(5,i) + ZERO_VALUE)
-//			+ coefficients[4] * (src.at<uchar>(6,i) + ZERO_VALUE);
-
-//		dst.at<uchar>(2+offset,i) = coefficients[0] * src.at<uchar>(4,i) 
-//			+ coefficients[1] * (src.at<uchar>(5,i) + src.at<uchar>(3,i))
-//			+ coefficients[2] * (src.at<uchar>(6,i) + src.at<uchar>(2,i))
-//			+ coefficients[3] * (src.at<uchar>(7,i) + src.at<uchar>(1,i))
-//			+ coefficients[4] * (src.at<uchar>(8,i) + src.at<uchar>(0,i));
-
-
-//		for (j = 3; j < (srcHeight/2) - 2; j++) {
-
-//			dst.at<uchar>(j+offset,i) = coefficients[0] * src.at<uchar>(2*j,i)
-//				+ coefficients[1] * (src.at<uchar>(2*j + 1,i) + src.at<uchar>(2*j - 1,i))
-//				+ coefficients[2] * (src.at<uchar>(2*j + 2,i) + src.at<uchar>(2*j - 2,i))
-//				+ coefficients[3] * (src.at<uchar>(2*j + 3,i) + src.at<uchar>(2*j - 3,i))
-//				+ coefficients[4] * (src.at<uchar>(2*j + 4,i) + src.at<uchar>(2*j - 4,i));
-//		}
-
-//		dst.at<uchar>(padding[0]+offset,i) = coefficients[0] * src.at<uchar>(2 * padding[0],i)
-//			+ coefficients[1] * (src.at<uchar>(2 * (padding[0])+ 1,i) 
-//			+ src.at<uchar>(2 *(padding[0]) - 1,i))
-//			+ coefficients[2] * (src.at<uchar>(2 *(padding[0]) + 2,i) 
-//			+ src.at<uchar>(2 *(padding[0]) - 2,i))
-//			+ coefficients[3] * (src.at<uchar>(2 *(padding[0]) + 3,i) 
-//			+ src.at<uchar>(2 *(padding[0]) - 3,i))
-//			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 *(padding[0]) - 4,i));
-
-//		dst.at<uchar>(padding[1]+offset,i) = coefficients[0] * src.at<uchar>(2*(padding[1]),i)
-//			+ coefficients[1] * (src.at<uchar>(2 *(padding[1]) + 1,i) + src.at<uchar>(2 *(padding[1]) - 1,i))
-//			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(2 *(padding[1]) - 2,i))
-//			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(2 *(padding[1]) - 3,i))
-//			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 * (padding[1]) - 4,i));
-
-//	/*	dst.at<uchar>(padding[2]+offset,i) = ZERO_VALUE
-//			+ coefficients[1] * (ZERO_VALUE + src.at<uchar>(2 *(padding[2]) - 1,i))
-//			+ coefficients[2] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2])- 2,i))
-//			+ coefficients[3] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2]) - 3,i))
-//			+ coefficients[4] * (ZERO_VALUE + src.at<uchar>(2 * (padding[2])- 4,i));*/
-//		}
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

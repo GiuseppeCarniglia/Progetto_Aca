@@ -3,6 +3,7 @@
 #include "opencv2/imgproc.hpp"
 #include <iostream>
 #include <math.h>
+#include<omp.h>
 
 using namespace cv;
 using namespace std;
@@ -14,15 +15,14 @@ using namespace std;
 /*
 ________________________________________________Haar Transform_________________________________________________________
 */
-#include<omp.h>
 
 Mat Haar_antitrasformata(Mat immagine_trasformata);
 
 Mat diff_of_images(Mat original, Mat antitransform);
 
 
-int main() {
-	const char* imgName = "./immagini/leonessa.jpg";
+int main(int argc, char *argv[]) {
+	const char* imgName = argv[1];
 	Mat image_original = imread(imgName, IMREAD_GRAYSCALE);
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
 
@@ -31,9 +31,8 @@ int main() {
 
 	Mat antitransform = cv::Mat(image.rows,image.cols,CV_8UC1);
 	Mat image_difference = cv::Mat(image.rows,image.cols,CV_8UC1);
-	int imageWidth = image.size().width;
+//	int imageWidth = image.size().width;
 	int w = 0;
-	int k = 0;
 
 	double initial_time = 0, final_time = 0;
 	int temp_row = 0;
@@ -72,7 +71,6 @@ int main() {
 
 	for (int i = 0; i < temp_col; i++) {
 		w = (image.rows);
-		k = 0;
 
 		for (int j = 0; j < w / 2; j++) {
 			dst.at<uchar>(j,i) = (image.at<uchar>(2*j, i) + image.at<uchar>(2*j+1, i)) / 2;
@@ -88,7 +86,7 @@ int main() {
 	final_time -= initial_time;
 	printf("time: %lf \n", final_time);
 
-	antitransform = Haar_antitrasformata(image);
+/*	antitransform = Haar_antitrasformata(image);
 	image_difference = diff_of_images(image_original, antitransform);
 
 	double min, max;
@@ -107,7 +105,7 @@ int main() {
 	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_antitrasformata.jpg",antitransform,compression_params);
 	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_differenza.jpg",image_difference,compression_params);
 
-	waitKey(0);
+	waitKey(0);*/
 
 	return 0;
 }

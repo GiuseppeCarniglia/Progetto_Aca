@@ -19,8 +19,8 @@ ________________________________________________Haar Transform__________________
 Mat Haar_antitrasformata(Mat immagine_trasformata);
 
 
-int main() {
-	const char* imgName = "./immagini/leonessa.jpg";
+int main(int argc, char* argv[]) {
+	const char* imgName = argv[1];
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
 	
 	Mat dst = cv::Mat(image.rows,image.cols,CV_8UC1);
@@ -84,7 +84,7 @@ int main() {
 	final_time -= initial_time;
 	printf("time: %lf \n", final_time);
 
-	vector<int> compression_params;
+/*	vector<int> compression_params;
 
 	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 
@@ -93,7 +93,7 @@ int main() {
 	imwrite("./immagini_modificate/Haar_parallela/Haar_parallela.jpg",image,compression_params);
 	imwrite("./immagini_modificate/Haar_parallela/Haar_parallela_antitrasformata.jpg",Haar_antitrasformata(image),compression_params);
 	
-	waitKey(0);
+	waitKey(0);*/
 	return 0;
 }
 

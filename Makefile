@@ -1,5 +1,5 @@
 CC = g++ -Wall
-CFLAGS = `pkg-config --cflags --libs opencv4` -fopenmp
+CFLAGS = `pkg-config --cflags --libs opencv4` -fopenmp 
 
 
 all: haar haar_serial CDF_9_7_seriale CDF_9_7_parallela

@@ -272,20 +272,20 @@ int main(int argc, char* argv[])
 	printf("time %lf\n", final_time);
 
 //    Copia di tmp_image_1 e tmp_image_2 in new_image
-    for(int i=0;i<imageWidth;i++){
+/*    for(int i=0;i<imageWidth;i++){
         for(int j=0;j<imageHeight/2;j++){
             new_image.at<uchar>(j,i) = tmp_image_1.at<uchar>(j,i);
         }
         for(int j=imageHeight/2;j<imageHeight;j++){
             new_image.at<uchar>(j,i) = tmp_image_2.at<uchar>(j,i);
         }
-    }
+    }*/
     
 /*    	cv::resize(new_image,new_image, cv::Size(1920,1080),0,0,cv::INTER_LINEAR);
 
 	imshow("CDF parallela",new_image);*/
 	
-	vector<int> compression_params;
+/*	vector<int> compression_params;
 
 	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
 
 	imwrite(file_name,new_image,compression_params);
 
-	waitKey(0);
+	waitKey(0);*/
 
 	return 0;
 }

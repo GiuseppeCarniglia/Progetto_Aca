@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 			dst.at<uchar>(i, j+(w/2)) = (image.at<uchar>(i,2*j) - image.at<uchar>(i,2*j+1))/2;
 		}
 		
-		printf("N Threads. %d, Thread ID %d\n",omp_get_num_threads(), omp_get_thread_num());
+		//printf("N Threads. %d, Thread ID %d\n",omp_get_num_threads(), omp_get_thread_num());
 	}
 			
 	#pragma omp for private(i,j) schedule(static)

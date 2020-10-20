@@ -54,6 +54,8 @@ int main(int argc, char* argv[])
 		#pragma omp for private(i,j) schedule(static)
 		for (i = 0; i < imageHeight ; i++) {
 
+//			printf("Thread id:%d\n",omp_get_thread_num());
+
 			new_image.at<uchar>(i,0) = coefficientsLP[0] * image.at<uchar>(i,0) 
 				+ coefficientsLP[1] * (image.at<uchar>(i, 1) + ZERO_VALUE)
 				+ coefficientsLP[2] * (image.at<uchar>(i, 2) + ZERO_VALUE)

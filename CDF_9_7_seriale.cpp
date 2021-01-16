@@ -20,7 +20,7 @@ using namespace std;
  */
 
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])	
 {
 	const char* imgName = argv[1];
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
@@ -34,11 +34,13 @@ int main(int argc, char *argv[])
 	double coefficientsHP[5] = { 1.11508705, -0.59127176314, -0.057543526229, 0.091271763114, 0.0 };
 	int padding[3] = { (w / 2) - 2 ,(w / 2) - 1 ,(w / 2) };
 	double initial_time = 0, final_time = 0;
+	int i=0,j=0;
 
+	double time_A=0,time_D=0,time_AA=0,time_DD=0;
 	initial_time = omp_get_wtime();
 
-	int i=0,j=0;
 	
+	time_A = omp_get_wtime();
 	for (i = 0; i < imageHeight; i++) {
 	
 		//Calcolo matrice di approssimazione a
@@ -144,13 +146,20 @@ int main(int argc, char *argv[])
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(i, (padding[2]<<1) - 4));
 	}
 
+	time_D = omp_get_wtime();
+	time_D -= time_A;
+
+
+
 	image = new_image.clone();
 
 	w = imageHeight;
 	padding[0] = (w/2)-2;
 	padding[1] = (w/2)-1;
 	padding[2] = (w/2);
-
+	
+	time_AA =  omp_get_wtime();
+	
 	for (i = 0; i < imageWidth; i++) {
 		
 		//Calcolo matrice di approssimazione aa e da
@@ -254,16 +263,24 @@ int main(int argc, char *argv[])
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>((padding[2]<<1)-4,i));
 		
 	}
-
+	time_DD = omp_get_wtime();
+	time_DD -= time_AA;
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
 
 	printf("time %lf\n", final_time);
+	printf("time A e D %lf\n", time_D);
+	printf("time AA e DD %lf\n", time_DD);
 
 
-	namedWindow("CDF_seriale", WINDOW_AUTOSIZE);
-    	cv::resize(new_image,new_image, cv::Size(1920,1080),0,0,cv::INTER_LINEAR);
-	imshow("CDF_seriale",new_image);
+	//namedWindow("CDF_seriale", WINDOW_AUTOSIZE);
+    //	cv::resize(new_image,new_image, cv::Size(1920,1080),0,0,cv::INTER_LINEAR);
+    //	Mat output_image = cv::Mat(imageHeight,imageWidth,CV_8UC1);
+    	
+    //	new_image.convertTo(new_image,CV_32FC1,1/255.0);
+    	
+    //	cv::normalize(new_image,output_image,0,255,NORM_MINMAX,CV_8UC1);
+	imshow("CDF seriale",new_image);
 
 //	vector<int> compression_params;
 
@@ -272,7 +289,7 @@ int main(int argc, char *argv[])
 //	compression_params.push_back(60);
 
 //	imwrite("./immagini_modificate/CDF_9_7_seriale/CDF_9_7_seriale.jpg",new_image,compression_params);
-	waitKey(0);
+	waitKey();
 
 	return 0;
 }

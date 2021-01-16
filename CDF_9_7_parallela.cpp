@@ -47,8 +47,9 @@ int main(int argc, char* argv[])
 
 	int i=0,j=0,offset=(imageWidth/2) - 1;
 
-
+	double time_A=0,time_D=0,time_AA=0,time_DD=0;
 	initial_time = omp_get_wtime();
+	time_A = omp_get_wtime();
     #pragma omp parallel
     {
 		#pragma omp for private(i,j) schedule(static)
@@ -160,11 +161,17 @@ int main(int argc, char* argv[])
 				+ coefficientsHP[4] * (ZERO_VALUE + image.at<uchar>(i, 2 * (padding[2]) - 4));
 		}
     }	
+    
+    		time_D = omp_get_wtime();
+    		time_D -= time_A;
+    
 		padding[0] = (imageHeight/ 2) - 2;
 		padding[1] = (imageHeight/ 2) - 1;
 		padding[2] = (imageHeight/ 2);
 		
 		offset = (imageHeight/2) - 1;
+		
+		time_AA = omp_get_wtime();
         #pragma omp parallel
         {
 		#pragma omp for private(i,j) schedule(static)
@@ -268,10 +275,16 @@ int main(int argc, char* argv[])
 				+ coefficientsHP[4] * (ZERO_VALUE + new_image.at<uchar>(2 * (padding[2])- 4,i));
 			}
 			
-        }	
+        }
+        time_DD = omp_get_wtime();
+        time_DD -= time_AA;
+        	
 	final_time = omp_get_wtime();
 	final_time -= initial_time;	
 	printf("time %lf\n", final_time);
+	
+	printf("time A e D %lf\n", time_D);
+	printf("time AA e DD %lf\n", time_DD);
 
 //    Copia di tmp_image_1 e tmp_image_2 in new_image
 /*    for(int i=0;i<imageWidth;i++){

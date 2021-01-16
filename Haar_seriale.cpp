@@ -8,7 +8,7 @@
 using namespace cv;
 using namespace std;
 
-#define ZERO_VALUE (ushort)0
+#define ZERO_VALUE (uchar)0
 
 
 
@@ -18,6 +18,7 @@ ________________________________________________Haar Transform__________________
 
 Mat Haar_antitrasformata(Mat immagine_trasformata);
 
+
 Mat diff_of_images(Mat original, Mat antitransform);
 
 
@@ -25,27 +26,35 @@ int main(int argc, char *argv[]) {
 	const char* imgName = argv[1];
 	Mat image_original = imread(imgName, IMREAD_GRAYSCALE);
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
-
+	int imageHeight = image.rows;
+	int imageWidth = image.cols;
 
 	Mat dst = cv::Mat(image.rows,image.cols,CV_8UC1);
 
 	Mat antitransform = cv::Mat(image.rows,image.cols,CV_8UC1);
 	Mat image_difference = cv::Mat(image.rows,image.cols,CV_8UC1);
-//	int imageWidth = image.size().width;
+		
 	int w = 0;
 
 	double initial_time = 0, final_time = 0;
 	int temp_row = 0;
 	int temp_col = 0;
 
-	initial_time = omp_get_wtime();
 
 	int i=0;
 	int j=0;
 
 	temp_row = (image.rows);
 	temp_col = (image.cols);
+    
+    double time_A = 0;
+    double time_D = 0;
+    double time_AA = 0;
+    double time_DD = 0;
 
+	initial_time = omp_get_wtime();
+
+    time_A = omp_get_wtime();
 	//immagine A e D
 	for (i = 0; i < temp_row; i++)
 	{
@@ -59,7 +68,8 @@ int main(int argc, char *argv[]) {
 		}
 
 	}
-
+    time_D = omp_get_wtime();
+    time_D -= time_A;
 
 	for (int i = 0; i < temp_row; i++) {
 		for (int j = 0; j < temp_col; j++) {
@@ -68,33 +78,42 @@ int main(int argc, char *argv[]) {
 	}
 
 
-
-	for (int i = 0; i < temp_col; i++) {
+    
 		w = (image.rows);
-
+        
+        time_AA = omp_get_wtime();
 		for (int j = 0; j < w / 2; j++) {
+
+        for(int i=0;i<image.cols;i++){
 			dst.at<uchar>(j,i) = (image.at<uchar>(2*j, i) + image.at<uchar>(2*j+1, i)) / 2;
 
 			dst.at<uchar>(j+(w/2),i) = (image.at<uchar>(2*j, i) - image.at<uchar>(2*j+1, i)) / 2;
 		}
-
-		for (int j = 0; j < temp_row; j++) {
-			image.at<uchar>(j, i) = dst.at<uchar>(j,i);
-		}
-	}
+        }
+        time_DD = omp_get_wtime();
+        time_DD -= time_AA;
+        
+//		for (int j = 0; j < temp_row; j++) {
+//			image.at<uchar>(j, i) = dst.at<uchar>(j,i);
+//		}
+//	}
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
 	printf("time: %lf \n", final_time);
 
-/*	antitransform = Haar_antitrasformata(image);
-	image_difference = diff_of_images(image_original, antitransform);
+	printf("time immagini A e D: %lf \n", time_D);
 
-	double min, max;
-	cv::minMaxLoc(image_difference, &min, &max);
+    
+	printf("time immagini AA e DA: %lf \n", time_DD);
+//	antitransform = Haar_antitrasformata(image);
+//	image_difference = diff_of_images(image_original, antitransform);
 
-	printf("Image difference\nLowest value:%lf Highest value:%lf\n",min,max);
+//	double min, max;
+//	cv::minMaxLoc(image_difference, &min, &max);
 
-	vector<int> compression_params;
+//	printf("Image difference\nLowest value:%lf Highest value:%lf\n",min,max);
+
+/*	vector<int> compression_params;
 
 	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 
@@ -103,9 +122,19 @@ int main(int argc, char *argv[]) {
 	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale.jpg",image,compression_params);
 
 	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_antitrasformata.jpg",antitransform,compression_params);
-	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_differenza.jpg",image_difference,compression_params);
+	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_differenza.jpg",image_difference,compression_params);*/
 
-	waitKey(0);*/
+	Mat output_image = cv::Mat(imageHeight,imageWidth,CV_8UC1);
+    	
+	//new_image.convertTo(new_image,CV_32FC1,1/255.0);
+    	
+	//cv::normalize(dst,output_image,0,255,NORM_MINMAX,CV_8UC1);	
+
+	imshow("Haar transform serial",dst);
+	//imshow("Haar antitransform serial",image_difference);
+
+
+	waitKey(0);
 
 	return 0;
 }

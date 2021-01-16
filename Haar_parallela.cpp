@@ -8,7 +8,7 @@
 using namespace cv;
 using namespace std;
 
-#define ZERO_VALUE (ushort)0
+#define ZERO_VALUE (uchar)0
 
 
 
@@ -41,11 +41,13 @@ int main(int argc, char* argv[]) {
 	w = (image.cols);
 	k = (image.rows);
 	
+	double time_A=0,time_D=0,time_AA=0,time_DD=0;
+	
 	initial_time = omp_get_wtime();
 	
 	//immagine A e D			
 	omp_set_num_threads(omp_get_max_threads());
-	
+	time_A = omp_get_wtime();
 	#pragma omp parallel for private(i,j) schedule(static)
 	for (i = 0; i < temp_row; i++) 
 	{
@@ -57,7 +59,8 @@ int main(int argc, char* argv[]) {
 		
 		//printf("N Threads. %d, Thread ID %d\n",omp_get_num_threads(), omp_get_thread_num());
 	}
-			
+	time_D = omp_get_wtime();
+	time_D -= time_A;
 	#pragma omp for private(i,j) schedule(static)
 	for (int i = 0; i < temp_row; i++) {
 		for (int j = 0; j < temp_col; j++) {
@@ -65,6 +68,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
+	time_AA = omp_get_wtime();
 	#pragma omp parallel for private(i,j) schedule(static)
 	for (int i = 0; i < w; i++) {		
 		for (int j = 0; j < k/2; j++) {
@@ -72,7 +76,8 @@ int main(int argc, char* argv[]) {
 			dst.at<uchar>(j+(k/2), i) = (image.at<uchar>(2*j,i) - image.at<uchar>(2*j+1,i))/2;
 		}
 	}
-	
+	time_DD = omp_get_wtime();
+	time_DD -= time_AA;
 	#pragma omp for private(i,j) schedule(static)
 	for (int i = 0; i < w; i++) {
 		for (int j = 0; j < k; j++) {
@@ -82,7 +87,9 @@ int main(int argc, char* argv[]) {
 	
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
-	printf("time: %lf \n", final_time);
+	printf("time A e D: %lf \n", time_D);
+	printf("time AA e DD: %lf \n", time_DD);
+
 
 /*	vector<int> compression_params;
 

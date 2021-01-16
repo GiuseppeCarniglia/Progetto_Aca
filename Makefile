@@ -1,4 +1,4 @@
-CC = g++ -Wall
+CC = g++  -Wall
 CFLAGS = `pkg-config --cflags --libs opencv4` -fopenmp 
 
 

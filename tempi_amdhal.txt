@@ -1,0 +1,18 @@
+Haar seriale:
+time: 0.733774 
+time immagini A e D: 0.279687 
+time immagini AA e DA: 0.281694 
+
+Haar parallela:
+time A e D: 0.141001 
+time AA e DD: 0.135472 
+
+CDF 9/7 serial:
+time 1.587080
+time A e D 0.796128
+time AA e DD 0.784944
+
+CDF 9/7 parallela:
+time 0.788352
+time A e D 0.395193
+time AA e DD 0.393158

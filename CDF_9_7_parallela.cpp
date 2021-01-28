@@ -48,6 +48,7 @@ int main(int argc, char* argv[])
 	int i=0,j=0,offset=(imageWidth/2) - 1;
 
 	double time_A=0,time_D=0,time_AA=0,time_DD=0;
+	
 	initial_time = omp_get_wtime();
 	time_A = omp_get_wtime();
     #pragma omp parallel
@@ -55,8 +56,7 @@ int main(int argc, char* argv[])
 		#pragma omp for private(i,j) schedule(static)
 		for (i = 0; i < imageHeight ; i++) {
 
-//			printf("Thread id:%d\n",omp_get_thread_num());
-
+			//Matrix A
 			new_image.at<uchar>(i,0) = coefficientsLP[0] * image.at<uchar>(i,0) 
 				+ coefficientsLP[1] * (image.at<uchar>(i, 1) + ZERO_VALUE)
 				+ coefficientsLP[2] * (image.at<uchar>(i, 2) + ZERO_VALUE)
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 				
 				
 				
-								
+			//Matrix D				
 			new_image.at<uchar>(i,0+offset) = coefficientsHP[0] * image.at<uchar>(i,0) 
 				+ coefficientsHP[1] * (image.at<uchar>(i, 1) + ZERO_VALUE)
 				+ coefficientsHP[2] * (image.at<uchar>(i, 2) + ZERO_VALUE)
@@ -98,21 +98,23 @@ int main(int argc, char* argv[])
 
 
 			for (j = 3; j < (imageWidth/2) - 2; j++) {
-
+				
+				//Matrix A
 				new_image.at<uchar>(i,j) = coefficientsLP[0] * image.at<uchar>(i, 2*j)
 				+ coefficientsLP[1] * (image.at<uchar>(i, 2*j + 1) + image.at<uchar>(i, 2*j - 1))
 				+ coefficientsLP[2] * (image.at<uchar>(i, 2*j + 2) + image.at<uchar>(i, 2*j - 2))
 				+ coefficientsLP[3] * (image.at<uchar>(i, 2*j + 3) + image.at<uchar>(i, 2*j - 3))
 				+ coefficientsLP[4] * (image.at<uchar>(i, 2*j + 4) + image.at<uchar>(i, 2*j - 4));
 				
-				
+				//Matrix D
 				new_image.at<uchar>(i,j+offset) = coefficientsHP[0] * image.at<uchar>(i, 2*j)
 				+ coefficientsHP[1] * (image.at<uchar>(i, 2*j + 1) + image.at<uchar>(i, 2*j - 1))
 				+ coefficientsHP[2] * (image.at<uchar>(i, 2*j + 2) + image.at<uchar>(i, 2*j - 2))
 				+ coefficientsHP[3] * (image.at<uchar>(i, 2*j + 3) + image.at<uchar>(i, 2*j - 3))
 				+ coefficientsHP[4] * (image.at<uchar>(i, 2*j + 4) + image.at<uchar>(i, 2*j - 4));
 			}
-
+			
+			//Matrix A
 			new_image.at<uchar>(i,padding[0]) = coefficientsLP[0] * image.at<uchar>(i, 2 * padding[0])
 				+ coefficientsLP[1] * (image.at<uchar>(i, 2 * (padding[0])+ 1) 
 				+ image.at<uchar>(i, 2 *(padding[0]) - 1))
@@ -137,7 +139,7 @@ int main(int argc, char* argv[])
 				
 				
 				
-					
+			//Matrix D	
 			new_image.at<uchar>(i,padding[0]+offset) = coefficientsHP[0] * image.at<uchar>(i, 2 * padding[0])
 				+ coefficientsHP[1] * (image.at<uchar>(i, 2 * (padding[0])+ 1) 
 				+ image.at<uchar>(i, 2 *(padding[0]) - 1))
@@ -163,7 +165,7 @@ int main(int argc, char* argv[])
     }	
     
     		time_D = omp_get_wtime();
-    		time_D -= time_A;
+    		time_D -= time_A; // Execution time of matrices A and D
     
 		padding[0] = (imageHeight/ 2) - 2;
 		padding[1] = (imageHeight/ 2) - 1;
@@ -176,7 +178,8 @@ int main(int argc, char* argv[])
         {
 		#pragma omp for private(i,j) schedule(static)
 		for (i = 0; i < imageWidth ; i++) {
-				
+			
+			//Matrices AA and AD
 			tmp_image_1.at<uchar>(0,i) = coefficientsLP[0] * new_image.at<uchar>(0,i) 
 				+ coefficientsLP[1] * (new_image.at<uchar>(1,i) + ZERO_VALUE)
 				+ coefficientsLP[2] * (new_image.at<uchar>(2,i) + ZERO_VALUE)
@@ -195,7 +198,7 @@ int main(int argc, char* argv[])
 				+ coefficientsLP[3] * (new_image.at<uchar>(7,i) + new_image.at<uchar>(1,i))
 				+ coefficientsLP[4] * (new_image.at<uchar>(8,i) + new_image.at<uchar>(0,i));
 
-
+			//Matrices DA and DD
 			tmp_image_2.at<uchar>(0+offset,i) = coefficientsHP[0] * new_image.at<uchar>(0,i) 
 				+ coefficientsHP[1] * (new_image.at<uchar>(1,i) + ZERO_VALUE)
 				+ coefficientsHP[2] * (new_image.at<uchar>(2,i) + ZERO_VALUE)
@@ -216,21 +219,22 @@ int main(int argc, char* argv[])
 
 
 			for (j = 3; j < (imageHeight/2) - 2; j++) {
-
+				//Matrices AA and AD
 				tmp_image_1.at<uchar>(j,i) = coefficientsLP[0] * new_image.at<uchar>(2*j,i)
 					+ coefficientsLP[1] * (new_image.at<uchar>(2*j + 1,i) + new_image.at<uchar>(2*j - 1,i))
 					+ coefficientsLP[2] * (new_image.at<uchar>(2*j + 2,i) + new_image.at<uchar>(2*j - 2,i))
 					+ coefficientsLP[3] * (new_image.at<uchar>(2*j + 3,i) + new_image.at<uchar>(2*j - 3,i))
 					+ coefficientsLP[4] * (new_image.at<uchar>(2*j + 4,i) + new_image.at<uchar>(2*j - 4,i));
 					
-					
+				//Matrices DA and DD	
 				tmp_image_2.at<uchar>(j+offset,i) = coefficientsHP[0] * new_image.at<uchar>(2*j,i)
 					+ coefficientsHP[1] * (new_image.at<uchar>(2*j + 1,i) + new_image.at<uchar>(2*j - 1,i))
 					+ coefficientsHP[2] * (new_image.at<uchar>(2*j + 2,i) + new_image.at<uchar>(2*j - 2,i))
 					+ coefficientsHP[3] * (new_image.at<uchar>(2*j + 3,i) + new_image.at<uchar>(2*j - 3,i))
 					+ coefficientsHP[4] * (new_image.at<uchar>(2*j + 4,i) + new_image.at<uchar>(2*j - 4,i));
 			}
-
+			
+			//Matrices AA and AD
 			tmp_image_1.at<uchar>(padding[0],i) = coefficientsLP[0] * new_image.at<uchar>(2 * padding[0],i)
 				+ coefficientsLP[1] * (new_image.at<uchar>(2 * (padding[0])+ 1,i) 
 				+ new_image.at<uchar>(2 *(padding[0]) - 1,i))
@@ -252,7 +256,7 @@ int main(int argc, char* argv[])
 				+ coefficientsLP[3] * (ZERO_VALUE + new_image.at<uchar>(2 * (padding[2]) - 3,i))
 				+ coefficientsLP[4] * (ZERO_VALUE + new_image.at<uchar>(2 * (padding[2])- 4,i));
 				
-				
+			//Matrices DA and DD
 			tmp_image_2.at<uchar>(padding[0]+offset,i) = coefficientsHP[0] * new_image.at<uchar>(2 * padding[0],i)
 				+ coefficientsHP[1] * (new_image.at<uchar>(2 * (padding[0])+ 1,i) 
 				+ new_image.at<uchar>(2 *(padding[0]) - 1,i))
@@ -277,7 +281,7 @@ int main(int argc, char* argv[])
 			
         }
         time_DD = omp_get_wtime();
-        time_DD -= time_AA;
+        time_DD -= time_AA; // Execution time of matrices AA, AD,DA and DD
         	
 	final_time = omp_get_wtime();
 	final_time -= initial_time;	
@@ -286,42 +290,25 @@ int main(int argc, char* argv[])
 	printf("time A e D %lf\n", time_D);
 	printf("time AA e DD %lf\n", time_DD);
 
-//    Copia di tmp_image_1 e tmp_image_2 in new_image
-/*    for(int i=0;i<imageWidth;i++){
+//   Copying of tmp_image_1 and tmp_image_2 in new_image
+    for(int i=0;i<imageWidth;i++){
         for(int j=0;j<imageHeight/2;j++){
             new_image.at<uchar>(j,i) = tmp_image_1.at<uchar>(j,i);
         }
         for(int j=imageHeight/2;j<imageHeight;j++){
             new_image.at<uchar>(j,i) = tmp_image_2.at<uchar>(j,i);
         }
-    }*/
+    }
     
-/*    	cv::resize(new_image,new_image, cv::Size(1920,1080),0,0,cv::INTER_LINEAR);
-
-	imshow("CDF parallela",new_image);*/
-	
+    	imshow("Parallel CDF 9/7", new_image);
+    	waitKey(0);
+    	
 /*	vector<int> compression_params;
 
 	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
 
 	compression_params.push_back(60);
 
-    char file_name[200] = "./immagini_modificate/CDF_9_7_parallela/CDF_9_7_parallela_";
-    char image_name[100]={""};
-    int pos = 0;
-    int name_length = (int)strlen(imgName);
-    for(int i=name_length;i>=0;i--){
-        if(imgName[i]== '/'){
-            pos = i+1;
-            break;
-        }
-    }
-    
-    for(int i=pos;i<name_length;i++){
-        image_name[i-pos] = imgName[i];
-    }
-    
-    strcat(file_name,image_name);
 
     printf("%s %d %d\n",file_name, name_length, pos);
 

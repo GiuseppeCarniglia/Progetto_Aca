@@ -1,4 +1,5 @@
 #include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
@@ -80,6 +81,7 @@ int main(int argc, char *argv[])
 			new_image[i][j] = 0.0;
 		}
 	}
+		
 	
 //	Calculations for matrix A
 	for (i = 0; i < imageHeight; i++) {
@@ -208,116 +210,117 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	w = imageHeight;
-	padding[0] = (w/2)-2;
-	padding[1] = (w/2)-1;
-	padding[2] = (w/2);
-	
-	time_AA =  omp_get_wtime();
-	
-	//Calculations for matrices AA and DA
-	for (i = 0; i < imageWidth; i++) {
-		
-		new_image[0][i] = coefficientsLP[0] * tmp_image.at<double>(0,i) 
-			+ coefficientsLP[1] * (tmp_image.at<double>(1,i) + ZERO_VALUE)
-			+ coefficientsLP[2] * (tmp_image.at<double>(2,i) + ZERO_VALUE)
-			+ coefficientsLP[3] * (tmp_image.at<double>(3,i) + ZERO_VALUE)
-			+ coefficientsLP[4] * (tmp_image.at<double>(4,i) + ZERO_VALUE);
+//	w = imageHeight;
+//	padding[0] = (w/2)-2;
+//	padding[1] = (w/2)-1;
+//	padding[2] = (w/2);
+//	
+//	time_AA =  omp_get_wtime();
+//	
+//	//Calculations for matrices AA and DA
+//	for (i = 0; i < imageWidth; i++) {
+//		
+//		new_image[0][i] = coefficientsLP[0] * tmp_image.at<double>(0,i) 
+//			+ coefficientsLP[1] * (tmp_image.at<double>(1,i) + ZERO_VALUE)
+//			+ coefficientsLP[2] * (tmp_image.at<double>(2,i) + ZERO_VALUE)
+//			+ coefficientsLP[3] * (tmp_image.at<double>(3,i) + ZERO_VALUE)
+//			+ coefficientsLP[4] * (tmp_image.at<double>(4,i) + ZERO_VALUE);
 
-		new_image[1][i] = coefficientsLP[0] * tmp_image.at<double>(2,i) 
-			+ coefficientsLP[1] * (tmp_image.at<double>(3,i) + tmp_image.at<double>(1,i))
-			+ coefficientsLP[2] * (tmp_image.at<double>(4,i) + tmp_image.at<double>(0,i))
-			+ coefficientsLP[3] * (tmp_image.at<double>(5,i) + ZERO_VALUE)
-			+ coefficientsLP[4] * (tmp_image.at<double>(6,i) + ZERO_VALUE);
+//		new_image[1][i] = coefficientsLP[0] * tmp_image.at<double>(2,i) 
+//			+ coefficientsLP[1] * (tmp_image.at<double>(3,i) + tmp_image.at<double>(1,i))
+//			+ coefficientsLP[2] * (tmp_image.at<double>(4,i) + tmp_image.at<double>(0,i))
+//			+ coefficientsLP[3] * (tmp_image.at<double>(5,i) + ZERO_VALUE)
+//			+ coefficientsLP[4] * (tmp_image.at<double>(6,i) + ZERO_VALUE);
 
-		new_image[2][i] = coefficientsLP[0] * tmp_image.at<double>(4,i) 
-			+ coefficientsLP[1] * (tmp_image.at<double>(5,i) + tmp_image.at<double>(3,i))
-			+ coefficientsLP[2] * (tmp_image.at<double>(6,i) + tmp_image.at<double>(2,i))
-			+ coefficientsLP[3] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(1,i))
-			+ coefficientsLP[4] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(0,i));
-
-
-		for (j = 3; j < (w/2) - 2; j++) {
-			new_image[j][i] = coefficientsLP[0] * tmp_image.at<double>((j<<1),i)
-				+ coefficientsLP[1] * (tmp_image.at<double>((j<<1) + 1,i) + tmp_image.at<double>((j<<1) - 1,i))
-				+ coefficientsLP[2] * (tmp_image.at<double>((j<<1) + 2,i) + tmp_image.at<double>((j<<1) - 2,i))
-				+ coefficientsLP[3] * (tmp_image.at<double>((j<<1) + 3,i) + tmp_image.at<double>((j<<1) - 3,i))
-				+ coefficientsLP[4] * (tmp_image.at<double>((j<<1) + 4,i) + tmp_image.at<double>((j<<1) - 4,i));
-		}
-
-		new_image[padding[0]][i] = coefficientsLP[0] * tmp_image.at<double>((padding[0]<<1),i)
-			+ coefficientsLP[1] * (tmp_image.at<double>((padding[0]<<1) + 1,i) 
-			+ tmp_image.at<double>((padding[0]<<1) - 1,i))
-			+ coefficientsLP[2] * (tmp_image.at<double>((padding[0]<<1) + 2,i) 
-			+ tmp_image.at<double>((padding[0]<<1) - 2,i))
-			+ coefficientsLP[3] * (tmp_image.at<double>((padding[0]<<1) + 3,i) 
-			+ tmp_image.at<double>((padding[0]<<1) - 3,i))
-			+ coefficientsLP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]<<1) - 4,i));
-
-		new_image[padding[1]][i] = coefficientsLP[0] * tmp_image.at<double>((padding[1]<<1),i)
-			+ coefficientsLP[1] * (tmp_image.at<double>((padding[1]<<1) + 1,i) 
-			+ tmp_image.at<double>((padding[1]<<1) - 1,i))
-			+ coefficientsLP[2] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1) - 2,i))
-			+ coefficientsLP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1) - 3,i))
-			+ coefficientsLP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1) - 4,i));
-
-		new_image[padding[2]][i] = ZERO_VALUE
-			+ coefficientsLP[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 1,i))
-			+ coefficientsLP[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 2,i))
-			+ coefficientsLP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 3,i))
-			+ coefficientsLP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 4,i));
-	}
-
-//	//Calculations for matrices DA and DD
-	for (i = 0; i < imageWidth ; i++) {
-
-		new_image[0+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>(0,i)
-			+ coefficientsHP[1] * (tmp_image.at<double>(1,i) + ZERO_VALUE)
-			+ coefficientsHP[2] * (tmp_image.at<double>(2,i) + ZERO_VALUE)
-			+ coefficientsHP[3] * (tmp_image.at<double>(3,i) + ZERO_VALUE)
-			+ coefficientsHP[4] * (tmp_image.at<double>(4,i) + ZERO_VALUE);
-
-		new_image[1+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>(2,i)
-			+ coefficientsHP[1] * (tmp_image.at<double>(3,i) + tmp_image.at<double>(1,i))
-			+ coefficientsHP[2] * (tmp_image.at<double>(4,i) + tmp_image.at<double>(0,i))
-			+ coefficientsHP[3] * (tmp_image.at<double>(5,i) + ZERO_VALUE)
-			+ coefficientsHP[4] * (tmp_image.at<double>(6,i) + ZERO_VALUE);
-
-		new_image[2+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>(4,i)
-			+ coefficientsHP[1] * (tmp_image.at<double>(5,i) + tmp_image.at<double>(3,i))
-			+ coefficientsHP[2] * (tmp_image.at<double>(6,i) + tmp_image.at<double>(2,i))
-			+ coefficientsHP[3] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(1,i))
-			+ coefficientsHP[4] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(0,i));
-
-		
-		for (j = 3; j < (w/2) - 2; j++) {
-			new_image[j+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>((j<<1),i)
-				+ coefficientsHP[1] * (tmp_image.at<double>((j<<1) + 1,i)+tmp_image.at<double>((j<<1) - 1,i))
-				+ coefficientsHP[2] * (tmp_image.at<double>((j<<1) + 2,i)+tmp_image.at<double>((j<<1) - 2,i))
-				+ coefficientsHP[3] * (tmp_image.at<double>((j<<1) + 3,i)+tmp_image.at<double>((j<<1) - 3,i))
-				+ coefficientsHP[4] * (tmp_image.at<double>((j<<1) + 4,i)+tmp_image.at<double>((j<<1) - 4,i));
-		}
-		
-		new_image[padding[0]+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>((padding[0]<<1),i)
-			+ coefficientsHP[1] * (tmp_image.at<double>((padding[0]<<1)+1,i) + tmp_image.at<double>((padding[0]<<1)-1,i))
-			+ coefficientsHP[2] * (tmp_image.at<double>((padding[0]<<1)+2,i) + tmp_image.at<double>((padding[0]<<1)-2,i))
-			+ coefficientsHP[3] * (tmp_image.at<double>((padding[0]<<1)+3,i) + tmp_image.at<double>((padding[0]<<1)-3,i))
-			+ coefficientsHP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]<<1)-4,i));
-		
-		new_image[padding[1]+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>((padding[1]<<1),i)
-			+ coefficientsHP[1] * (tmp_image.at<double>((padding[1]<<1)+1,i) + tmp_image.at<double>((padding[1]<<1)-1,i))
-			+ coefficientsHP[2] * (tmp_image.at<double>((padding[1]<<1)+2,i) + tmp_image.at<double>((padding[1]<<1)-2,i))
-			+ coefficientsHP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1)-3,i))
-			+ coefficientsHP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1)-4,i));
+//		new_image[2][i] = coefficientsLP[0] * tmp_image.at<double>(4,i) 
+//			+ coefficientsLP[1] * (tmp_image.at<double>(5,i) + tmp_image.at<double>(3,i))
+//			+ coefficientsLP[2] * (tmp_image.at<double>(6,i) + tmp_image.at<double>(2,i))
+//			+ coefficientsLP[3] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(1,i))
+//			+ coefficientsLP[4] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(0,i));
 
 
-		new_image[padding[2]+(w/2 - 1)][i] = ZERO_VALUE
-			+ coefficientsHP[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-1,i))
-			+ coefficientsHP[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-2,i))
-			+ coefficientsHP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-3,i))
-			+ coefficientsHP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-4,i));
-		
-	}
+//		for (j = 3; j < (w/2) - 2; j++) {
+//			new_image[j][i] = coefficientsLP[0] * tmp_image.at<double>((j<<1),i)
+//				+ coefficientsLP[1] * (tmp_image.at<double>((j<<1) + 1,i) + tmp_image.at<double>((j<<1) - 1,i))
+//				+ coefficientsLP[2] * (tmp_image.at<double>((j<<1) + 2,i) + tmp_image.at<double>((j<<1) - 2,i))
+//				+ coefficientsLP[3] * (tmp_image.at<double>((j<<1) + 3,i) + tmp_image.at<double>((j<<1) - 3,i))
+//				+ coefficientsLP[4] * (tmp_image.at<double>((j<<1) + 4,i) + tmp_image.at<double>((j<<1) - 4,i));
+//		}
+
+//		new_image[padding[0]][i] = coefficientsLP[0] * tmp_image.at<double>((padding[0]<<1),i)
+//			+ coefficientsLP[1] * (tmp_image.at<double>((padding[0]<<1) + 1,i) 
+//			+ tmp_image.at<double>((padding[0]<<1) - 1,i))
+//			+ coefficientsLP[2] * (tmp_image.at<double>((padding[0]<<1) + 2,i) 
+//			+ tmp_image.at<double>((padding[0]<<1) - 2,i))
+//			+ coefficientsLP[3] * (tmp_image.at<double>((padding[0]<<1) + 3,i) 
+//			+ tmp_image.at<double>((padding[0]<<1) - 3,i))
+//			+ coefficientsLP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]<<1) - 4,i));
+
+//		new_image[padding[1]][i] = coefficientsLP[0] * tmp_image.at<double>((padding[1]<<1),i)
+//			+ coefficientsLP[1] * (tmp_image.at<double>((padding[1]<<1) + 1,i) 
+//			+ tmp_image.at<double>((padding[1]<<1) - 1,i))
+//			+ coefficientsLP[2] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1) - 2,i))
+//			+ coefficientsLP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1) - 3,i))
+//			+ coefficientsLP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1) - 4,i));
+
+//		new_image[padding[2]][i] = ZERO_VALUE
+//			+ coefficientsLP[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 1,i))
+//			+ coefficientsLP[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 2,i))
+//			+ coefficientsLP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 3,i))
+//			+ coefficientsLP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1) - 4,i));
+//	}
+
+////	//Calculations for matrices DA and DD
+//	for (i = 0; i < imageWidth ; i++) {
+
+//		new_image[0+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>(0,i)
+//			+ coefficientsHP[1] * (tmp_image.at<double>(1,i) + ZERO_VALUE)
+//			+ coefficientsHP[2] * (tmp_image.at<double>(2,i) + ZERO_VALUE)
+//			+ coefficientsHP[3] * (tmp_image.at<double>(3,i) + ZERO_VALUE)
+//			+ coefficientsHP[4] * (tmp_image.at<double>(4,i) + ZERO_VALUE);
+
+//		new_image[1+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>(2,i)
+//			+ coefficientsHP[1] * (tmp_image.at<double>(3,i) + tmp_image.at<double>(1,i))
+//			+ coefficientsHP[2] * (tmp_image.at<double>(4,i) + tmp_image.at<double>(0,i))
+//			+ coefficientsHP[3] * (tmp_image.at<double>(5,i) + ZERO_VALUE)
+//			+ coefficientsHP[4] * (tmp_image.at<double>(6,i) + ZERO_VALUE);
+
+//		new_image[2+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>(4,i)
+//			+ coefficientsHP[1] * (tmp_image.at<double>(5,i) + tmp_image.at<double>(3,i))
+//			+ coefficientsHP[2] * (tmp_image.at<double>(6,i) + tmp_image.at<double>(2,i))
+//			+ coefficientsHP[3] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(1,i))
+//			+ coefficientsHP[4] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(0,i));
+
+//		
+//		for (j = 3; j < (w/2) - 2; j++) {
+//			new_image[j+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>((j<<1),i)
+//				+ coefficientsHP[1] * (tmp_image.at<double>((j<<1) + 1,i)+tmp_image.at<double>((j<<1) - 1,i))
+//				+ coefficientsHP[2] * (tmp_image.at<double>((j<<1) + 2,i)+tmp_image.at<double>((j<<1) - 2,i))
+//				+ coefficientsHP[3] * (tmp_image.at<double>((j<<1) + 3,i)+tmp_image.at<double>((j<<1) - 3,i))
+//				+ coefficientsHP[4] * (tmp_image.at<double>((j<<1) + 4,i)+tmp_image.at<double>((j<<1) - 4,i));
+//		}
+//		
+//		new_image[padding[0]+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>((padding[0]<<1),i)
+//			+ coefficientsHP[1] * (tmp_image.at<double>((padding[0]<<1)+1,i) + tmp_image.at<double>((padding[0]<<1)-1,i))
+//			+ coefficientsHP[2] * (tmp_image.at<double>((padding[0]<<1)+2,i) + tmp_image.at<double>((padding[0]<<1)-2,i))
+//			+ coefficientsHP[3] * (tmp_image.at<double>((padding[0]<<1)+3,i) + tmp_image.at<double>((padding[0]<<1)-3,i))
+//			+ coefficientsHP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]<<1)-4,i));
+//		
+//		new_image[padding[1]+(w/2 - 1)][i] = coefficientsHP[0] * tmp_image.at<double>((padding[1]<<1),i)
+//			+ coefficientsHP[1] * (tmp_image.at<double>((padding[1]<<1)+1,i) + tmp_image.at<double>((padding[1]<<1)-1,i))
+//			+ coefficientsHP[2] * (tmp_image.at<double>((padding[1]<<1)+2,i) + tmp_image.at<double>((padding[1]<<1)-2,i))
+//			+ coefficientsHP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1)-3,i))
+//			+ coefficientsHP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]<<1)-4,i));
+
+
+//		new_image[padding[2]+(w/2 - 1)][i] = ZERO_VALUE
+//			+ coefficientsHP[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-1,i))
+//			+ coefficientsHP[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-2,i))
+//			+ coefficientsHP[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-3,i))
+//			+ coefficientsHP[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]<<1)-4,i));
+//		
+//	}
+
 //	time_DD = omp_get_wtime();
 //	time_DD -= time_AA;
 //	final_time = omp_get_wtime();
@@ -338,243 +341,265 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	//Antitrasformata per immagini AA and AD
-	for (i = 0; i < imageWidth; i++) {
-		
-		new_image[0][i] = coefficientsLPR[0] * tmp_image.at<double>(0,i) 
-			+ coefficientsLPR[1] * (tmp_image.at<double>(1,i) + ZERO_VALUE)
-			+ coefficientsLPR[2] * (tmp_image.at<double>(2,i) + ZERO_VALUE)
-			+ coefficientsLPR[3] * (tmp_image.at<double>(3,i) + ZERO_VALUE)
-			+ coefficientsLPR[4] * (tmp_image.at<double>(4,i) + ZERO_VALUE);
+//	//Antitrasformata per immagini AA and AD
+//	for (i = 0; i < imageWidth; i++) {
+//		
+//		new_image[0][i] = coefficientsLPR[0] * tmp_image.at<double>(0,i) 
+//			+ coefficientsLPR[1] * (tmp_image.at<double>(1,i) + ZERO_VALUE)
+//			+ coefficientsLPR[2] * (tmp_image.at<double>(2,i) + ZERO_VALUE)
+//			+ coefficientsLPR[3] * (tmp_image.at<double>(3,i) + ZERO_VALUE)
+//			+ coefficientsLPR[4] * (tmp_image.at<double>(4,i) + ZERO_VALUE);
 
-		new_image[2*1][i] = coefficientsLPR[0] * tmp_image.at<double>(2,i) 
-			+ coefficientsLPR[1] * (tmp_image.at<double>(3,i) + tmp_image.at<double>(1,i))
-			+ coefficientsLPR[2] * (tmp_image.at<double>(4,i) + tmp_image.at<double>(0,i))
-			+ coefficientsLPR[3] * (tmp_image.at<double>(5,i) + ZERO_VALUE)
-			+ coefficientsLPR[4] * (tmp_image.at<double>(6,i) + ZERO_VALUE);
+//		new_image[2*1][i] = coefficientsLPR[0] * tmp_image.at<double>(2,i) 
+//			+ coefficientsLPR[1] * (tmp_image.at<double>(3,i) + tmp_image.at<double>(1,i))
+//			+ coefficientsLPR[2] * (tmp_image.at<double>(4,i) + tmp_image.at<double>(0,i))
+//			+ coefficientsLPR[3] * (tmp_image.at<double>(5,i) + ZERO_VALUE)
+//			+ coefficientsLPR[4] * (tmp_image.at<double>(6,i) + ZERO_VALUE);
 
-		new_image[2*2][i] = coefficientsLPR[0] * tmp_image.at<double>(4,i) 
-			+ coefficientsLPR[1] * (tmp_image.at<double>(5,i) + tmp_image.at<double>(3,i))
-			+ coefficientsLPR[2] * (tmp_image.at<double>(6,i) + tmp_image.at<double>(2,i))
-			+ coefficientsLPR[3] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(1,i))
-			+ coefficientsLPR[4] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(0,i));
-			
-		new_image[2*3][i] = coefficientsLPR[0] * tmp_image.at<double>(6,i) 
-			+ coefficientsLPR[1] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(5,i))
-			+ coefficientsLPR[2] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(4,i))
-			+ coefficientsLPR[3] * (tmp_image.at<double>(9,i) + tmp_image.at<double>(3,i))
-			+ coefficientsLPR[4] * (tmp_image.at<double>(10,i) + tmp_image.at<double>(2,i));
-
-
-		for (j = 4; j < (w/2) - 2; j++) {
-			new_image[2*j][i] = coefficientsLPR[0] * tmp_image.at<double>((j),i)
-				+ coefficientsLPR[1] * (tmp_image.at<double>((j) + 1,i) + tmp_image.at<double>((j) - 1,i))
-				+ coefficientsLPR[2] * (tmp_image.at<double>((j) + 2,i) + tmp_image.at<double>((j) - 2,i))
-				+ coefficientsLPR[3] * (tmp_image.at<double>((j) + 3,i) + tmp_image.at<double>((j) - 3,i))
-				+ coefficientsLPR[4] * (tmp_image.at<double>((j) + 4,i) + tmp_image.at<double>((j) - 4,i));
-		}
-
-		new_image[2*padding[0]][i] = coefficientsLPR[0] * tmp_image.at<double>((padding[0]),i)
-			+ coefficientsLPR[1] * (tmp_image.at<double>((padding[0]) + 1,i) 
-			+ tmp_image.at<double>((padding[0]) - 1,i))
-			+ coefficientsLPR[2] * (tmp_image.at<double>((padding[0]) + 2,i) 
-			+ tmp_image.at<double>((padding[0]) - 2,i))
-			+ coefficientsLPR[3] * (tmp_image.at<double>((padding[0]) + 3,i) 
-			+ tmp_image.at<double>((padding[0]) - 3,i))
-			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]) - 4,i));
-
-		new_image[2*padding[1]][i] = coefficientsLPR[0] * tmp_image.at<double>((padding[1]),i)
-			+ coefficientsLPR[1] * (tmp_image.at<double>((padding[1]) + 1,i) 
-			+ tmp_image.at<double>((padding[1]) - 1,i))
-			+ coefficientsLPR[2] * (ZERO_VALUE + tmp_image.at<double>((padding[1]) - 2,i))
-			+ coefficientsLPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]) - 3,i))
-			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]) - 4,i));
-
-		new_image[2*padding[2]-1][i] = ZERO_VALUE
-			+ coefficientsLPR[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 1,i))
-			+ coefficientsLPR[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 2,i))
-			+ coefficientsLPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 3,i))
-			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 4,i));
-	}	
-
-	//Antitrasformata immagini DA e DD
-	for (i = 0; i < imageWidth ; i++) {
-
-		new_image[0][i] += coefficientsHPR[0] * tmp_image.at<double>(0+(w/2 - 1),i)
-			+ coefficientsHPR[1] * (tmp_image.at<double>(1+(w/2 - 1),i) + ZERO_VALUE)
-			+ coefficientsHPR[2] * (tmp_image.at<double>(2+(w/2 - 1),i) + ZERO_VALUE)
-			+ coefficientsHPR[3] * (tmp_image.at<double>(3+(w/2 - 1),i) + ZERO_VALUE)
-			+ coefficientsHPR[4] * (tmp_image.at<double>(4+(w/2 - 1),i) + ZERO_VALUE);
-
-		new_image[2*1][i] += coefficientsHPR[0] * tmp_image.at<double>(2+(w/2 - 1),i)
-			+ coefficientsHPR[1] * (tmp_image.at<double>(3+(w/2 - 1),i) + tmp_image.at<double>(1+(w/2 - 1),i))
-			+ coefficientsHPR[2] * (tmp_image.at<double>(4+(w/2 - 1),i) + tmp_image.at<double>(0+(w/2 - 1),i))
-			+ coefficientsHPR[3] * (tmp_image.at<double>(5+(w/2 - 1),i) + ZERO_VALUE)
-			+ coefficientsHPR[4] * (tmp_image.at<double>(6+(w/2 - 1),i) + ZERO_VALUE);
-
-		new_image[2*2][i] += coefficientsHPR[0] * tmp_image.at<double>(4+(w/2 - 1),i)
-			+ coefficientsHPR[1] * (tmp_image.at<double>(5+(w/2 - 1),i) + tmp_image.at<double>(3+(w/2 - 1),i))
-			+ coefficientsHPR[2] * (tmp_image.at<double>(6+(w/2 - 1),i) + tmp_image.at<double>(2+(w/2 - 1),i))
-			+ coefficientsHPR[3] * (tmp_image.at<double>(7+(w/2 - 1),i) + tmp_image.at<double>(1+(w/2 - 1),i))
-			+ coefficientsHPR[4] * (tmp_image.at<double>(8+(w/2 - 1),i) + tmp_image.at<double>(0+(w/2 - 1),i));
-
-		
-		for (j = 3; j < (w/2) - 2; j++) {
-			new_image[2*j][i] += coefficientsHPR[0] * tmp_image.at<double>((j+(w/2 - 1)),i)
-				+ coefficientsHPR[1] * (tmp_image.at<double>((j+(w/2 - 1)) + 1,i)+tmp_image.at<double>((j+(w/2 - 1)) - 1,i))
-				+ coefficientsHPR[2] * (tmp_image.at<double>((j+(w/2 - 1)) + 2,i)+tmp_image.at<double>((j+(w/2 - 1)) - 2,i))
-				+ coefficientsHPR[3] * (tmp_image.at<double>((j+(w/2 - 1)) + 3,i)+tmp_image.at<double>((j+(w/2 - 1)) - 3,i))
-				+ coefficientsHPR[4] * (tmp_image.at<double>((j+(w/2 - 1)) + 4,i)+tmp_image.at<double>((j+(w/2 - 1)) - 4,i));
-		}
-		
-		new_image[2*padding[0]][i] += coefficientsHPR[0] * tmp_image.at<double>((padding[0]+(w/2 - 1)),i)
-			+ coefficientsHPR[1] * (tmp_image.at<double>((padding[0]+(w/2 - 1))+1,i) + tmp_image.at<double>((padding[0]+(w/2 - 1))-1,i))
-			+ coefficientsHPR[2] * (tmp_image.at<double>((padding[0]+(w/2 - 1))+2,i) + tmp_image.at<double>((padding[0]+(w/2 - 1))-2,i))
-			+ coefficientsHPR[3] * (tmp_image.at<double>((padding[0]+(w/2 - 1))+3,i) + tmp_image.at<double>((padding[0]+(w/2 - 1))-3,i))
-			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]+(w/2 - 1))-4,i));
-		
-		new_image[2*padding[1]][i] += coefficientsHPR[0] * tmp_image.at<double>((padding[1]+(w/2 - 1)),i)
-			+ coefficientsHPR[1] * (tmp_image.at<double>((padding[1]+(w/2 - 1))+1,i) + tmp_image.at<double>((padding[1]+(w/2 - 1))-1,i))
-			+ coefficientsHPR[2] * (tmp_image.at<double>((padding[1]+(w/2 - 1))+2,i) + tmp_image.at<double>((padding[1]+(w/2 - 1))-2,i))
-			+ coefficientsHPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]+(w/2 - 1))-3,i))
-			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]+(w/2 - 1))-4,i));
+//		new_image[2*2][i] = coefficientsLPR[0] * tmp_image.at<double>(4,i) 
+//			+ coefficientsLPR[1] * (tmp_image.at<double>(5,i) + tmp_image.at<double>(3,i))
+//			+ coefficientsLPR[2] * (tmp_image.at<double>(6,i) + tmp_image.at<double>(2,i))
+//			+ coefficientsLPR[3] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(1,i))
+//			+ coefficientsLPR[4] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(0,i));
+//			
+//		new_image[2*3][i] = coefficientsLPR[0] * tmp_image.at<double>(6,i) 
+//			+ coefficientsLPR[1] * (tmp_image.at<double>(7,i) + tmp_image.at<double>(5,i))
+//			+ coefficientsLPR[2] * (tmp_image.at<double>(8,i) + tmp_image.at<double>(4,i))
+//			+ coefficientsLPR[3] * (tmp_image.at<double>(9,i) + tmp_image.at<double>(3,i))
+//			+ coefficientsLPR[4] * (tmp_image.at<double>(10,i) + tmp_image.at<double>(2,i));
 
 
-		new_image[2*padding[2]- 1][i] += ZERO_VALUE
-			+ coefficientsHPR[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-1,i))
-			+ coefficientsHPR[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-2,i))
-			+ coefficientsHPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-3,i))
-			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-4,i));
-		
-	}
+//		for (j = 4; j < (w/2) - 2; j++) {
+//			new_image[2*j][i] = coefficientsLPR[0] * tmp_image.at<double>((j),i)
+//				+ coefficientsLPR[1] * (tmp_image.at<double>((j) + 1,i) + tmp_image.at<double>((j) - 1,i))
+//				+ coefficientsLPR[2] * (tmp_image.at<double>((j) + 2,i) + tmp_image.at<double>((j) - 2,i))
+//				+ coefficientsLPR[3] * (tmp_image.at<double>((j) + 3,i) + tmp_image.at<double>((j) - 3,i))
+//				+ coefficientsLPR[4] * (tmp_image.at<double>((j) + 4,i) + tmp_image.at<double>((j) - 4,i));
+//		}
+
+//		new_image[2*padding[0]][i] = coefficientsLPR[0] * tmp_image.at<double>((padding[0]),i)
+//			+ coefficientsLPR[1] * (tmp_image.at<double>((padding[0]) + 1,i) 
+//			+ tmp_image.at<double>((padding[0]) - 1,i))
+//			+ coefficientsLPR[2] * (tmp_image.at<double>((padding[0]) + 2,i) 
+//			+ tmp_image.at<double>((padding[0]) - 2,i))
+//			+ coefficientsLPR[3] * (tmp_image.at<double>((padding[0]) + 3,i) 
+//			+ tmp_image.at<double>((padding[0]) - 3,i))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]) - 4,i));
+
+//		new_image[2*padding[1]][i] = coefficientsLPR[0] * tmp_image.at<double>((padding[1]),i)
+//			+ coefficientsLPR[1] * (tmp_image.at<double>((padding[1]) + 1,i) 
+//			+ tmp_image.at<double>((padding[1]) - 1,i))
+//			+ coefficientsLPR[2] * (ZERO_VALUE + tmp_image.at<double>((padding[1]) - 2,i))
+//			+ coefficientsLPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]) - 3,i))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]) - 4,i));
+
+//		new_image[2*padding[2]-1][i] = ZERO_VALUE
+//			+ coefficientsLPR[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 1,i))
+//			+ coefficientsLPR[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 2,i))
+//			+ coefficientsLPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 3,i))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]) - 4,i));
+//	}	
+
+//	//Antitrasformata immagini DA e DD
+//	for (i = 0; i < imageWidth ; i++) {
+
+//		new_image[0][i] += coefficientsHPR[0] * tmp_image.at<double>(0+(w/2 - 1),i)
+//			+ coefficientsHPR[1] * (tmp_image.at<double>(1+(w/2 - 1),i) + ZERO_VALUE)
+//			+ coefficientsHPR[2] * (tmp_image.at<double>(2+(w/2 - 1),i) + ZERO_VALUE)
+//			+ coefficientsHPR[3] * (tmp_image.at<double>(3+(w/2 - 1),i) + ZERO_VALUE)
+//			+ coefficientsHPR[4] * (tmp_image.at<double>(4+(w/2 - 1),i) + ZERO_VALUE);
+
+//		new_image[2*1][i] += coefficientsHPR[0] * tmp_image.at<double>(2+(w/2 - 1),i)
+//			+ coefficientsHPR[1] * (tmp_image.at<double>(3+(w/2 - 1),i) + tmp_image.at<double>(1+(w/2 - 1),i))
+//			+ coefficientsHPR[2] * (tmp_image.at<double>(4+(w/2 - 1),i) + tmp_image.at<double>(0+(w/2 - 1),i))
+//			+ coefficientsHPR[3] * (tmp_image.at<double>(5+(w/2 - 1),i) + ZERO_VALUE)
+//			+ coefficientsHPR[4] * (tmp_image.at<double>(6+(w/2 - 1),i) + ZERO_VALUE);
+
+//		new_image[2*2][i] += coefficientsHPR[0] * tmp_image.at<double>(4+(w/2 - 1),i)
+//			+ coefficientsHPR[1] * (tmp_image.at<double>(5+(w/2 - 1),i) + tmp_image.at<double>(3+(w/2 - 1),i))
+//			+ coefficientsHPR[2] * (tmp_image.at<double>(6+(w/2 - 1),i) + tmp_image.at<double>(2+(w/2 - 1),i))
+//			+ coefficientsHPR[3] * (tmp_image.at<double>(7+(w/2 - 1),i) + tmp_image.at<double>(1+(w/2 - 1),i))
+//			+ coefficientsHPR[4] * (tmp_image.at<double>(8+(w/2 - 1),i) + tmp_image.at<double>(0+(w/2 - 1),i));
+
+//		
+//		for (j = 3; j < (w/2) - 2; j++) {
+//			new_image[2*j][i] += coefficientsHPR[0] * tmp_image.at<double>((j+(w/2 - 1)),i)
+//				+ coefficientsHPR[1] * (tmp_image.at<double>((j+(w/2 - 1)) + 1,i)+tmp_image.at<double>((j+(w/2 - 1)) - 1,i))
+//				+ coefficientsHPR[2] * (tmp_image.at<double>((j+(w/2 - 1)) + 2,i)+tmp_image.at<double>((j+(w/2 - 1)) - 2,i))
+//				+ coefficientsHPR[3] * (tmp_image.at<double>((j+(w/2 - 1)) + 3,i)+tmp_image.at<double>((j+(w/2 - 1)) - 3,i))
+//				+ coefficientsHPR[4] * (tmp_image.at<double>((j+(w/2 - 1)) + 4,i)+tmp_image.at<double>((j+(w/2 - 1)) - 4,i));
+//		}
+//		
+//		new_image[2*padding[0]][i] += coefficientsHPR[0] * tmp_image.at<double>((padding[0]+(w/2 - 1)),i)
+//			+ coefficientsHPR[1] * (tmp_image.at<double>((padding[0]+(w/2 - 1))+1,i) + tmp_image.at<double>((padding[0]+(w/2 - 1))-1,i))
+//			+ coefficientsHPR[2] * (tmp_image.at<double>((padding[0]+(w/2 - 1))+2,i) + tmp_image.at<double>((padding[0]+(w/2 - 1))-2,i))
+//			+ coefficientsHPR[3] * (tmp_image.at<double>((padding[0]+(w/2 - 1))+3,i) + tmp_image.at<double>((padding[0]+(w/2 - 1))-3,i))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[0]+(w/2 - 1))-4,i));
+//		
+//		new_image[2*padding[1]][i] += coefficientsHPR[0] * tmp_image.at<double>((padding[1]+(w/2 - 1)),i)
+//			+ coefficientsHPR[1] * (tmp_image.at<double>((padding[1]+(w/2 - 1))+1,i) + tmp_image.at<double>((padding[1]+(w/2 - 1))-1,i))
+//			+ coefficientsHPR[2] * (tmp_image.at<double>((padding[1]+(w/2 - 1))+2,i) + tmp_image.at<double>((padding[1]+(w/2 - 1))-2,i))
+//			+ coefficientsHPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[1]+(w/2 - 1))-3,i))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[1]+(w/2 - 1))-4,i));
+
+
+//		new_image[2*padding[2]- 1][i] += ZERO_VALUE
+//			+ coefficientsHPR[1] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-1,i))
+//			+ coefficientsHPR[2] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-2,i))
+//			+ coefficientsHPR[3] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-3,i))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>((padding[2]+(w/2 - 1))-4,i));
+//		
+//	}
 	
-	for(int i=0;i<imageHeight;i++){
-		for(int j=0;j<imageWidth;j++){
-			 tmp_image.at<double>(i,j) = new_image[i][j];
-		}
-	}
+//	for(int i=0;i<imageHeight;i++){
+//		for(int j=0;j<imageWidth;j++){
+//			 tmp_image.at<double>(i,j) = new_image[i][j];
+//		}
+//	}
 	
-	for(int i=0;i<imageHeight;i++){
-		for(int j=0;j<imageWidth;j++){
-			
-			new_image[i][j] = 0.0;
-		}
-	}
+//	for(int i=0;i<imageHeight;i++){
+//		for(int j=0;j<imageWidth;j++){
+//			
+//			new_image[i][j] = 0.0;
+//		}
+//	}
 
 	w = imageWidth;
 	padding[0] = (w/2)-2;
 	padding[1] = (w/2)-1;
 	padding[2] = (w/2);
+	
+	Mat upTmp1 = cv::Mat(imageHeight,imageWidth/2,CV_64FC1);
+	Mat upTmp2 = cv::Mat(imageHeight,imageWidth/2,CV_64FC1);
+	
+	Mat upTmp3 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+	Mat upTmp4 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+	
+	
+	for(int i=0; i<imageHeight;i++){
+		for(int j=0;j<imageWidth/2;j++){
+		
+			upTmp1.at<double>(i,j) = tmp_image.at<double>(i,j);
+		
+			upTmp2.at<double>(i,j) = tmp_image.at<double>(i,j+(imageWidth/2));
+		
+		}
+	}
+	
+	
+	cv::resize(upTmp1,upTmp3,Size(),2.0,1.0);
+	cv::resize(upTmp2,upTmp4,Size(),2.0,1.0);
+	
 
 	//Antitrasformata immagine A
 	for (i = 0; i < imageHeight; i++) {
 
-	new_image[i][2*0] = coefficientsLPR[0] * tmp_image.at<double>(i,0) 
-		+ coefficientsLPR[1] * (tmp_image.at<double>(i, 1) + ZERO_VALUE)
-		+ coefficientsLPR[2] * (tmp_image.at<double>(i, 2) + ZERO_VALUE)
-		+ coefficientsLPR[3] * (tmp_image.at<double>(i, 3) + ZERO_VALUE)
-		+ coefficientsLPR[4] * (tmp_image.at<double>(i, 4) + ZERO_VALUE);
+	new_image[i][0] = coefficientsLPR[0] * upTmp3.at<double>(i,0) 
+		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 1) + ZERO_VALUE)
+		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 2) + ZERO_VALUE)
+		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 3) + ZERO_VALUE)
+		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 4) + ZERO_VALUE);
 	//printf("i: %d new_image: %lf\n",i,new_image[i][0]);
 
-	new_image[i][2*1] = coefficientsLPR[0] * tmp_image.at<double>(i, 2) 
-		+ coefficientsLPR[1] * (tmp_image.at<double>(i, 3) + tmp_image.at<double>(i, 1))
-		+ coefficientsLPR[2] * (tmp_image.at<double>(i, 4) + tmp_image.at<double>(i, 0))
-		+ coefficientsLPR[3] * (tmp_image.at<double>(i, 5) + ZERO_VALUE)
-		+ coefficientsLPR[4] * (tmp_image.at<double>(i, 6) + ZERO_VALUE);
+	new_image[i][1] = coefficientsLPR[0] * upTmp3.at<double>(i, 2) 
+		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 3) + upTmp3.at<double>(i, 1))
+		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 4) + upTmp3.at<double>(i, 0))
+		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 5) + ZERO_VALUE)
+		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 6) + ZERO_VALUE);
 
 	//printf("i: %d new_image: %lf\n",i,new_image[i][0]);
 	
-	new_image[i][2*2] = coefficientsLPR[0] * tmp_image.at<double>(i, 4) 
-		+ coefficientsLPR[1] * (tmp_image.at<double>(i, 5) + tmp_image.at<double>(i, 3))
-		+ coefficientsLPR[2] * (tmp_image.at<double>(i, 6) + tmp_image.at<double>(i, 2))
-		+ coefficientsLPR[3] * (tmp_image.at<double>(i, 7) + tmp_image.at<double>(i, 1))
-		+ coefficientsLPR[4] * (tmp_image.at<double>(i, 8) + tmp_image.at<double>(i, 0));
+	new_image[i][2] = coefficientsLPR[0] * upTmp3.at<double>(i, 4) 
+		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 5) + upTmp3.at<double>(i, 3))
+		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 6) + upTmp3.at<double>(i, 2))
+		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 7) + upTmp3.at<double>(i, 1))
+		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 8) + upTmp3.at<double>(i, 0));
 
 
-	for (j = 3; j < (w/2) - 2; j++) {
-		new_image[i][2*j] = coefficientsLPR[0] * tmp_image.at<double>(i, (j))
-				+ coefficientsLPR[1] * (tmp_image.at<double>(i, (j) + 1) + tmp_image.at<double>(i, (j) - 1))
-				+ coefficientsLPR[2] * (tmp_image.at<double>(i, (j) + 2) + tmp_image.at<double>(i, (j) - 2))
-				+ coefficientsLPR[3] * (tmp_image.at<double>(i, (j) + 3) + tmp_image.at<double>(i, (j) - 3))
-				+ coefficientsLPR[4] * (tmp_image.at<double>(i, (j) + 4) + tmp_image.at<double>(i, (j) - 4));
+	for (j = 3; j < (w) - 2; j++) {
+		new_image[i][j] = coefficientsLPR[0] * upTmp3.at<double>(i, (j))
+				+ coefficientsLPR[1] * (upTmp3.at<double>(i, (j) + 1) + upTmp3.at<double>(i, (j) - 1))
+				+ coefficientsLPR[2] * (upTmp3.at<double>(i, (j) + 2) + upTmp3.at<double>(i, (j) - 2))
+				+ coefficientsLPR[3] * (upTmp3.at<double>(i, (j) + 3) + upTmp3.at<double>(i, (j) - 3))
+				+ coefficientsLPR[4] * (upTmp3.at<double>(i, (j) + 4) + upTmp3.at<double>(i, (j) - 4));
 			
 			
 		}
 
-		new_image[i][2*padding[0]] = coefficientsLPR[0] * tmp_image.at<double>(i,(padding[0]<<1))
-			+ coefficientsLPR[1] * (tmp_image.at<double>(i, (padding[0]) + 1) 
-			+ tmp_image.at<double>(i, (padding[0]) - 1))
-			+ coefficientsLPR[2] * (tmp_image.at<double>(i, (padding[0]<<1) + 2) 
-			+ tmp_image.at<double>(i, (padding[0]) - 2))
-			+ coefficientsLPR[3] * (tmp_image.at<double>(i, (padding[0]<<1) + 3) 
-			+ tmp_image.at<double>(i, (padding[0]) - 3))
-			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[0]) - 4));
+		new_image[i][2*padding[0]] = coefficientsLPR[0] * upTmp3.at<double>(i,(padding[0]<<1))
+			+ coefficientsLPR[1] * (upTmp3.at<double>(i, (padding[0]) + 1) 
+			+ upTmp3.at<double>(i, (padding[0]) - 1))
+			+ coefficientsLPR[2] * (upTmp3.at<double>(i, (padding[0]<<1) + 2) 
+			+ upTmp3.at<double>(i, (padding[0]) - 2))
+			+ coefficientsLPR[3] * (upTmp3.at<double>(i, (padding[0]<<1) + 3) 
+			+ upTmp3.at<double>(i, (padding[0]) - 3))
+			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[0]) - 4));
 
-		new_image[i][2*padding[1]] = coefficientsLPR[0] * tmp_image.at<double>(i, (padding[1]<<1))
-			+ coefficientsLPR[1] * (tmp_image.at<double>(i,(padding[1]) + 1) 
-			+ tmp_image.at<double>(i, (padding[1]) - 1))
-			+ coefficientsLPR[2] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[1]) - 2))
-			+ coefficientsLPR[3] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[1]) - 3))
-			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[1]) - 4));
+		new_image[i][2*padding[1]] = coefficientsLPR[0] * upTmp3.at<double>(i, (padding[1]<<1))
+			+ coefficientsLPR[1] * (upTmp3.at<double>(i,(padding[1]) + 1) 
+			+ upTmp3.at<double>(i, (padding[1]) - 1))
+			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[1]) - 2))
+			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[1]) - 3))
+			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[1]) - 4));
 
 		new_image[i][2*padding[2]] = ZERO_VALUE
-			+ coefficientsLPR[1] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]) - 1))
-			+ coefficientsLPR[2] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]) - 2))
-			+ coefficientsLPR[3] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]) - 3))
-			+ coefficientsLPR[4] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]) - 4));
+			+ coefficientsLPR[1] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[2]) - 1))
+			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[2]) - 2))
+			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[2]) - 3))
+			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, (padding[2]) - 4));
 	}
 	
 	
 	//Antitrasformata immagine D
 	for (i = 0; i < imageHeight ; i++) {
 
-	new_image[i][0] += coefficientsHPR[0] * tmp_image.at<double>(i, 0+(w/2))
-		+ coefficientsHPR[1] * (tmp_image.at<double>(i, 1+(w/2)) + ZERO_VALUE)
-		+ coefficientsHPR[2] * (tmp_image.at<double>(i, 2+(w/2)) + ZERO_VALUE)
-		+ coefficientsHPR[3] * (tmp_image.at<double>(i, 3+(w/2)) + ZERO_VALUE)
-		+ coefficientsHPR[4] * (tmp_image.at<double>(i, 4+(w/2)) + ZERO_VALUE);
+	new_image[i][0] += coefficientsHPR[0] * upTmp4.at<double>(i, 0)
+		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 1) + ZERO_VALUE)
+		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 2) + ZERO_VALUE)
+		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 3) + ZERO_VALUE)
+		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 4) + ZERO_VALUE);
 
-	new_image[i][2*1] += coefficientsHPR[0] * tmp_image.at<double>(i, 2+(w/2))
-		+ coefficientsHPR[1] * (tmp_image.at<double>(i, 3+(w/2)) + tmp_image.at<double>(i, 1+(w/2)))
-		+ coefficientsHPR[2] * (tmp_image.at<double>(i, 4+(w/2)) + tmp_image.at<double>(i, 0+(w/2)))
-		+ coefficientsHPR[3] * (tmp_image.at<double>(i, 5+(w/2)) + ZERO_VALUE)
-		+ coefficientsHPR[4] * (tmp_image.at<double>(i, 6+(w/2)) + ZERO_VALUE);
+	new_image[i][1] += coefficientsHPR[0] * upTmp4.at<double>(i, 2)
+		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 3) + upTmp4.at<double>(i, 1))
+		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 4) + upTmp4.at<double>(i, 0))
+		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 5) + ZERO_VALUE)
+		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 6) + ZERO_VALUE);
 
-	new_image[i][2*2] += coefficientsHPR[0] * tmp_image.at<double>(i, 4+(w/2))
-		+ coefficientsHPR[1] * (tmp_image.at<double>(i, 5+(w/2)) + tmp_image.at<double>(i, 3+(w/2)))
-		+ coefficientsHPR[2] * (tmp_image.at<double>(i, 6+(w/2)) + tmp_image.at<double>(i, 2+(w/2)))
-		+ coefficientsHPR[3] * (tmp_image.at<double>(i, 7+(w/2)) + tmp_image.at<double>(i, 1+(w/2)))
-		+ coefficientsHPR[4] * (tmp_image.at<double>(i, 8+(w/2)) + tmp_image.at<double>(i, 0+(w/2)));
+	new_image[i][2] += coefficientsHPR[0] * upTmp4.at<double>(i, 4)
+		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 5) + upTmp4.at<double>(i, 3))
+		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 6) + upTmp4.at<double>(i, 2))
+		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 7) + upTmp4.at<double>(i, 1))
+		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 8) + upTmp4.at<double>(i, 0));
 
 	
-	for (j = 3; j < (w/2) - 2; j++) {
-		 new_image[i][2*j] += coefficientsHPR[0] * tmp_image.at<double>(i, (j+(w/2)))
-				+ coefficientsHPR[1] * (tmp_image.at<double>(i, (j+(w/2)) + 1)+tmp_image.at<double>(i, (j+(w/2)) - 1))
-				+ coefficientsHPR[2] * (tmp_image.at<double>(i, (j+(w/2)) + 2)+tmp_image.at<double>(i, (j+(w/2)) - 2))
-				+ coefficientsHPR[3] * (tmp_image.at<double>(i, (j+(w/2)) + 3)+tmp_image.at<double>(i, (j+(w/2)) - 3))
-				+ coefficientsHPR[4] * (tmp_image.at<double>(i, (j+(w/2)) + 4)+tmp_image.at<double>(i, (j+(w/2)) - 4));
+	for (j = 3; j < w - 2; j++) {
+		 new_image[i][j] += coefficientsHPR[0] * upTmp4.at<double>(i, (j))
+				+ coefficientsHPR[1] * (upTmp4.at<double>(i, (j) + 1)+upTmp4.at<double>(i, (j) - 1))
+				+ coefficientsHPR[2] * (upTmp4.at<double>(i, (j) + 2)+upTmp4.at<double>(i, (j) - 2))
+				+ coefficientsHPR[3] * (upTmp4.at<double>(i, (j) + 3)+upTmp4.at<double>(i, (j) - 3))
+				+ coefficientsHPR[4] * (upTmp4.at<double>(i, (j) + 4)+upTmp4.at<double>(i, (j) - 4));
 				
 		}
 		
-		new_image[i][2*padding[0]] += coefficientsHPR[0] * tmp_image.at<double>(i, (padding[0] << 1))
-			+ coefficientsHPR[1] * (tmp_image.at<double>(i, (padding[0] << 1) + 1) 
-				+ tmp_image.at<double>(i, (padding[0] << 1) - 1))
-			+ coefficientsHPR[2] * (tmp_image.at<double>(i, (padding[0] << 1) + 2) 
-				+ tmp_image.at<double>(i, (padding[0] << 1) - 2))
-			+ coefficientsHPR[3] * (tmp_image.at<double>(i, (padding[0] << 1) + 3) 
-				+ tmp_image.at<double>(i, (padding[0] << 1) - 3))
-			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[0] << 1) - 4));
+		new_image[i][w -2] += coefficientsHPR[0] * upTmp4.at<double>(i, (padding[0] << 1))
+			+ coefficientsHPR[1] * (upTmp4.at<double>(i, (padding[0] << 1) + 1) 
+				+ upTmp4.at<double>(i, (padding[0] << 1) - 1))
+			+ coefficientsHPR[2] * (upTmp4.at<double>(i, (padding[0] << 1) + 2) 
+				+ upTmp4.at<double>(i, (padding[0] << 1) - 2))
+			+ coefficientsHPR[3] * (upTmp4.at<double>(i, (padding[0] << 1) + 3) 
+				+ upTmp4.at<double>(i, (padding[0] << 1) - 3))
+			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[0] << 1) - 4));
 		
-		new_image[i][2*padding[1]] += coefficientsHPR[0] * tmp_image.at<double>(i, (padding[1] << 1))
-			+ coefficientsHPR[1] * (tmp_image.at<double>(i, (padding[1]<<1)+1) + tmp_image.at<double>(i, (padding[1] << 1) - 1))
-			+ coefficientsHPR[2] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[1] << 1) - 2))
-			+ coefficientsHPR[3] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[1] << 1) - 3))
-			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[1] << 1) - 4));
-		new_image[i][2*padding[2]] += ZERO_VALUE 
-			+ coefficientsHPR[1] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]<<1) - 1))
-			+ coefficientsHPR[2] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]<<1) - 2))
-			+ coefficientsHPR[3] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]<<1) - 3))
-			+ coefficientsHPR[4] * (ZERO_VALUE + tmp_image.at<double>(i, (padding[2]<<1) - 4));
+		new_image[i][w -1] += coefficientsHPR[0] * upTmp4.at<double>(i, (padding[1] << 1))
+			+ coefficientsHPR[1] * (upTmp4.at<double>(i, (padding[1]<<1)+1) + upTmp4.at<double>(i, (padding[1] << 1) - 1))
+			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[1] << 1) - 2))
+			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[1] << 1) - 3))
+			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[1] << 1) - 4));
+		new_image[i][w] += ZERO_VALUE 
+			+ coefficientsHPR[1] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[2]<<1) - 1))
+			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[2]<<1) - 2))
+			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[2]<<1) - 3))
+			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, (padding[2]<<1) - 4));
 	}
 
 
@@ -583,13 +608,23 @@ int main(int argc, char *argv[])
 
 
 	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
-//	
+	
 	for(int i=0;i<imageHeight;i++){
 		for(int j=0;j<imageWidth;j++){
 			
 			 tmp_image.at<double>(i,j) = new_image[i][j];
 		}
-	}	
+	}
+	
+	
+//	for(int i=0;i<imageHeight;i++){
+//		for(int j=0;j<imageWidth;j++){
+//			
+//			 tmp_image.at<double>(i,j) = image.at<double>(i,j) - new_image[i][j];
+//		}
+//	}
+	
+		
 //	
 //	
 //	for(int i=0;i<imageHeight;i++){

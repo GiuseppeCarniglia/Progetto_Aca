@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include <omp.h>
+#include<stdlib.h>
 
 using namespace cv;
 using namespace std;
@@ -30,10 +31,10 @@ int main(int argc, char* argv[])
 	image.convertTo(image,CV_64FC1);
 	
 
-	Mat new_image = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+	Mat new_image = cv::Mat(imageHeight,imageWidth,CV_64FC1);	
 
-	Mat tmp_image_1 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
-	Mat tmp_image_2 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+	Mat tmp_image_1;
+	Mat tmp_image_2;
 
 	double coefficientsLP[5] = { 0.602949018236,0.266864118443,-0.078223266529,-0.016864118443,0.26748757411 };
 	double coefficientsHP[5] = { 1.11508705, -0.59127176314, -0.057543526229, 0.091271763114, 0.0 };
@@ -49,13 +50,19 @@ int main(int argc, char* argv[])
 	}
 
 	int i=0,j=0,offset=(imageWidth/2) - 1;
+	
+	int nOfLevels = atoi(argv[2]);
+	int k=0;
 
 	double time_A=0,time_D=0,time_AA=0,time_DD=0;
 	
 	initial_time = omp_get_wtime();
 	time_A = omp_get_wtime();
-    #pragma omp parallel
-    {
+	
+	for(k=0;k<nOfLevels;k++){
+	
+	    #pragma omp parallel
+	    {
 		#pragma omp for private(i,j) schedule(static)
 		for (i = 0; i < imageHeight ; i++) {
 
@@ -165,7 +172,7 @@ int main(int argc, char* argv[])
 				+ coefficientsHP[3] * (ZERO_VALUE + image.at<double>(i, 2 * (padding[2]) - 3))
 				+ coefficientsHP[4] * (ZERO_VALUE + image.at<double>(i, 2 * (padding[2]) - 4));
 		}
-    }	
+	}	
     
     		time_D = omp_get_wtime();
     		time_D -= time_A; // Execution time of matrices A and D
@@ -175,6 +182,11 @@ int main(int argc, char* argv[])
 		padding[2] = (imageHeight/ 2);
 		
 		offset = (imageHeight/2) - 1;
+		
+		
+		tmp_image_1 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+		tmp_image_2 = cv::Mat(imageHeight,imageWidth,CV_64FC1);	
+		
 		
 		time_AA = omp_get_wtime();
         #pragma omp parallel
@@ -283,6 +295,33 @@ int main(int argc, char* argv[])
 			}
 			
         }
+        
+        	#pragma omp parallel for schedule(static)
+		//Copying of tmp_image_1 and tmp_image_2 in new_image and image for next level. new_image is the cumulative image
+		for(int i = 0;i < imageWidth;i++){
+			for(int j = 0;j < imageHeight/2;j++){
+			    image.at<double>(j,i) = tmp_image_1.at<double>(j,i);
+			    new_image.at<double>(j,i) = tmp_image_1.at<double>(j,i);
+			}
+			for(int j = imageHeight/2;j < imageHeight;j++){
+			    image.at<double>(j,i) = tmp_image_2.at<double>(j,i);
+			    new_image.at<double>(j,i) = tmp_image_2.at<double>(j,i);
+			}
+		}
+	
+	
+	
+		imageHeight = imageHeight / 2;
+		imageWidth = imageWidth / 2;
+		
+		padding[0] = (imageWidth / 2) - 2;
+		padding[1] = (imageWidth / 2) - 1;
+		padding[2] = (imageWidth / 2);
+		
+		offset = (imageWidth / 2) - 1;
+
+        
+	}
         time_DD = omp_get_wtime();
         time_DD -= time_AA; // Execution time of matrices AA, AD,DA and DD
         	
@@ -293,22 +332,17 @@ int main(int argc, char* argv[])
 	printf("time A e D %lf\n", time_D);
 	printf("time AA e DD %lf\n", time_DD);
 
-//   Copying of tmp_image_1 and tmp_image_2 in new_image
-    for(int i=0;i<imageWidth;i++){
-        for(int j=0;j<imageHeight/2;j++){
-            new_image.at<double>(j,i) = tmp_image_1.at<double>(j,i);
-        }
-        for(int j=imageHeight/2;j<imageHeight;j++){
-            new_image.at<double>(j,i) = tmp_image_2.at<double>(j,i);
-        }
-    }
-    
-    
+        
     	cv::Mat final_image(imageHeight, imageWidth, CV_8UC1);
     	
     	cv::normalize(new_image, final_image, 0,255,NORM_MINMAX, CV_8UC1);
     	
     
+	namedWindow("Parallel CDF 9/7",WINDOW_NORMAL);
+	if(image.rows >=1920 || image.cols >= 1080){
+		cv::resizeWindow("Parallel CDF 9/7",1920,1080);
+	}
+   
     	imshow("Parallel CDF 9/7", final_image);
     	waitKey(0);
     	

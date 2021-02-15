@@ -4,11 +4,12 @@
 #include <iostream>
 #include <math.h>
 #include<omp.h>
+#include<stdlib.h>
 
 using namespace cv;
 using namespace std;
 
-#define ZERO_VALUE (uchar)0
+#define ZERO_VALUE (double)0
 
 
 
@@ -16,7 +17,7 @@ using namespace std;
 ________________________________________________Haar Transform_________________________________________________________
 */
 
-Mat Haar_antitrasformata(Mat immagine_trasformata);
+Mat Haar_antitrasformata(Mat immagine_trasformata, int nOfLevels);
 
 
 Mat diff_of_images(Mat original, Mat antitransform);
@@ -26,11 +27,16 @@ int main(int argc, char *argv[]) {
 	const char* imgName = argv[1];
 	Mat image_original = imread(imgName, IMREAD_GRAYSCALE);
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
+	
+	image.convertTo(image, CV_64FC1);
+	
+	int imageHeight = image.rows;
+	int imageWidth = image.cols;
 
-	Mat dst = cv::Mat(image.rows,image.cols,CV_8UC1);
+	Mat dst = cv::Mat(image.rows,image.cols,CV_64FC1);
 
-	Mat antitransform = cv::Mat(image.rows,image.cols,CV_8UC1);
-	Mat image_difference = cv::Mat(image.rows,image.cols,CV_8UC1);
+	Mat antitransform = cv::Mat(image.rows,image.cols,CV_64FC1);
+	Mat image_difference = cv::Mat(image.rows,image.cols,CV_64FC1);
 		
 	int w = 0;
 
@@ -41,6 +47,16 @@ int main(int argc, char *argv[]) {
 
 	int i=0;
 	int j=0;
+	int k=0;
+	int nOfLevels = atoi(argv[2]);
+	
+	if(nOfLevels <= 0){
+	
+		perror("Numero di livelli deve essere >= 0\n");
+		return 1;
+	}
+	
+	
 
 	temp_row = (image.rows);
 	temp_col = (image.cols);
@@ -50,44 +66,63 @@ int main(int argc, char *argv[]) {
 	double time_AA = 0;
 	double time_DD = 0;
 
+		
+	w = imageWidth;
+
+
 	initial_time = omp_get_wtime();
 
 	time_A = omp_get_wtime();
 	//immagine A e D
-	for (i = 0; i < temp_row; i++)
+	for(k=0;k<nOfLevels;k++){
+
+	for (i = 0; i < imageHeight; i++)
 	{
-		w = (image.cols);
+		
 
-		for (j = 0; j < w / 2; j++) {
-			dst.at<uchar>(i,j) = (image.at<uchar>(i, j + j) + image.at<uchar>(i, j + j + 1)) / 2;
-		}
-		for (j = 0; j < w/2; j++) {
-			dst.at<uchar>(i,j+(w/2)) = (image.at<uchar>(i, j +j) - image.at<uchar>(i, j+j+1))/2;
-		}
-
-	}
-
-	//Redundant code is possible to eliminate but would change execution times so for 
-	//consistency we kept it
-	for (int i = 0; i < temp_row; i++) {
-		for (int j = 0; j < temp_col; j++) {
-			image.at<uchar>(i, j) = dst.at<uchar>(i, j);
+		for (j = 0; j < imageWidth / 2; j++) {
+			dst.at<double>(i,j) = (image.at<double>(i,2*j) + image.at<double>(i,2*j + 1)) / 2;
+			
+			dst.at<double>(i,j+(w/2)) = (image.at<double>(i,2*j) - image.at<double>(i,2*j+1))/2;
 		}
 	}
+
+////	Redundant code is possible to eliminate but would change execution times so for 
+////	consistency we kept it
+//	for (int i = 0; i < temp_row; i++) {
+//		for (int j = 0; j < temp_col; j++) {
+//			image.at<double>(i, j) = dst.at<double>(i, j);
+//		}
+//	}
 
 	time_D = omp_get_wtime();
 	time_D -= time_A; // execution time of first calculation
 
-	w = (image.rows);
+	w = imageHeight;
         
         time_AA = omp_get_wtime();
-		for (int j = 0; j < w / 2; j++) {
+		for (int i = 0; i < imageHeight / 2; i++) {
 
-        for(int i=0;i<image.cols;i++){
-		dst.at<uchar>(j,i) = (image.at<uchar>(2*j, i) + image.at<uchar>(2*j+1, i)) / 2;
+			for(int j=0;j<imageWidth;j++){
+				image.at<double>(i,j) = (dst.at<double>(2*i, j) + dst.at<double>(2*i+1, j)) / 2;
 
-		dst.at<uchar>(j+(w/2),i) = (image.at<uchar>(2*j, i) - image.at<uchar>(2*j+1, i)) / 2;
+				image.at<double>(i+(w/2),j) = (dst.at<double>(2*i, j) - dst.at<double>(2*i+1, j)) / 2;
+				}
 		}
+		
+		for (int i = 0; i < imageHeight; i++) {
+			for (int j = 0; j < imageWidth; j++) {
+				dst.at<double>(i, j) = image.at<double>(i, j);
+			}
+		}
+		
+		
+		imageHeight = imageHeight / 2;
+		imageWidth = imageWidth / 2;
+		
+		w = imageWidth;
+		
+		
         }
         time_DD = omp_get_wtime();
         time_DD -= time_AA; // execution time of second calculation
@@ -101,9 +136,18 @@ int main(int argc, char *argv[]) {
     
 	printf("time immagini AA e DA: %lf \n", time_DD);
 	
-	imshow("Haar transform serial",dst);
+	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
 	
-//	antitransform = Haar_antitrasformata(image);
+	cv::normalize(image,final_image, 0,255,NORM_MINMAX,CV_8UC1);
+	
+	imshow("Haar transform serial",final_image);
+		
+	antitransform = Haar_antitrasformata(image,nOfLevels);
+	
+	cv::normalize(antitransform,final_image, 0,255,NORM_MINMAX,CV_8UC1);
+	
+	imshow("Haar antitransform serial",final_image);
+	
 //	image_difference = diff_of_images(image_original, antitransform);
 
 //	double min, max;
@@ -132,34 +176,52 @@ int main(int argc, char *argv[]) {
 }
 
 // Haar antitransform
-Mat Haar_antitrasformata(Mat immagine_trasformata){
+Mat Haar_antitrasformata(Mat immagine_trasformata, int nOfLevels){
 
-	Mat image_out = cv::Mat(immagine_trasformata.rows, immagine_trasformata.cols, CV_8UC1);
-	Mat image_out_2 = cv::Mat(immagine_trasformata.rows, immagine_trasformata.cols, CV_8UC1);
+	Mat image_out;
+	Mat image_out_2;
 
-	int k = immagine_trasformata.rows;
-	int w = immagine_trasformata.cols;
-	int i=0, j=0;
+	int k = immagine_trasformata.rows/pow(2, nOfLevels - 1);
+	int w = immagine_trasformata.cols/pow(2, nOfLevels - 1);
+	int i=0, j=0, t=0;
 
+
+
+	for(t=0;t<nOfLevels;t++){
+		image_out = cv::Mat(k,w, CV_64FC1);
+		image_out_2 = cv::Mat(k,w, CV_64FC1);
+	
 	for(i=0;i<k/2;i++){
 		for(j=0;j<w;j++){
-			image_out.at<uchar>(2*i,j) = immagine_trasformata.at<uchar>(i,j) + immagine_trasformata.at<uchar>(i+(k/2),j);
+			image_out.at<double>(2*i,j) = immagine_trasformata.at<double>(i,j) + immagine_trasformata.at<double>(i+(k/2),j);
 
-			image_out.at<uchar>(2*i+1,j) = immagine_trasformata.at<uchar>(i,j) - immagine_trasformata.at<uchar>(i+(k/2),j);
+			image_out.at<double>(2*i+1,j) = immagine_trasformata.at<double>(i,j) - immagine_trasformata.at<double>(i+(k/2),j);
 
 		}
 	}
 
 	for(i=0;i<k;i++){
 		for(j=0;j<w/2;j++){
-			image_out_2.at<uchar>(i,2*j) = image_out.at<uchar>(i,j) + image_out.at<uchar>(i,j+(w/2));
+			image_out_2.at<double>(i,2*j) = image_out.at<double>(i,j) + image_out.at<double>(i,j+(w/2));
 
-			image_out_2.at<uchar>(i,2*j+1) = image_out.at<uchar>(i,j) - image_out.at<uchar>(i,j+(w/2));
+			image_out_2.at<double>(i,2*j+1) = image_out.at<double>(i,j) - image_out.at<double>(i,j+(w/2));
 
 		}
 	}
+	
+	for(i=0;i<k;i++){
+		for(j=0;j<w;j++){
+		
+			immagine_trasformata.at<double>(i,j) = image_out_2.at<double>(i,j);
+		
+		}
+	}
+	
+		k = 2*k;
+		w = 2*w;
+	}
 
-	return image_out_2;
+	return immagine_trasformata;
 }
 
 //Difference of images
@@ -169,7 +231,7 @@ Mat diff_of_images(Mat original, Mat antitransform){
 		perror("Images of different sizes");
 	}
 
-	Mat image_diff = cv::Mat(original.rows, original.cols, CV_8UC1);
+	Mat image_diff = cv::Mat(original.rows, original.cols, CV_64FC1);
 
 	int i=0, j=0;
 
@@ -177,7 +239,7 @@ Mat diff_of_images(Mat original, Mat antitransform){
 
 		for(j=0;j<original.cols;j++){
 
-			image_diff.at<uchar>(i,j) = original.at<uchar>(i,j) - antitransform.at<uchar>(i,j);
+			image_diff.at<double>(i,j) = original.at<double>(i,j) - antitransform.at<double>(i,j);
 		}
 	}
 

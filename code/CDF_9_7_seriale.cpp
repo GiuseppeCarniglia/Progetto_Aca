@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
 	int i=0,j=0,k=0,nOfLevels = atoi(argv[2]);
 	
 	
-	if(atoi<0){
-		printf("N of levels must be >0\n");
-		exit;
+	if(nOfLevels<0){
+		perror("N of levels must be >0\n");
+		return 1;
 	}
 
 	double time_A=0,time_D=0,time_AA=0,time_DD=0;
@@ -322,14 +322,14 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-//	imageHeight = imageHeight/2;
-//	imageWidth = imageWidth/2;
-//	
-//	w = imageWidth;
+	imageHeight = imageHeight/2;
+	imageWidth = imageWidth/2;
+	
+	w = imageWidth;
 
-//	padding[0] = (w/2)-2;
-//	padding[1] = (w/2)-1;
-//	padding[2] = (w/2);
+	padding[0] = (w/2)-2;
+	padding[1] = (w/2)-1;
+	padding[2] = (w/2);
 
 	}
 
@@ -340,23 +340,28 @@ int main(int argc, char *argv[])
 //	
 //	
 //	
-	for(int i=0;i<imageHeight;i++){
-		for(int j=0;j<imageWidth;j++){
+	for(int i=0;i<image.rows;i++){
+		for(int j=0;j<image.cols;j++){
 			 tmp_image.at<double>(i,j) = image.at<double>(i,j);
 		}
 	}
-//	
-	for(int i=0;i<imageHeight;i++){
-		for(int j=0;j<imageWidth;j++){
+	
+	for(int i=0;i<image.rows;i++){
+		for(int j=0;j<image.cols;j++){
 			new_image[i][j] = 0.0;
 		}
 	}
 
 
+				
 
 //===============================================================================================
 //===========================           ANTITRASFORMATA             =============================
 //===============================================================================================
+
+
+	printf("Calculating antritransform\n");
+
 
 	Mat upTmp1 ;
 	Mat upTmp2 ;
@@ -366,13 +371,11 @@ int main(int argc, char *argv[])
 
 	for(k=0;k<nOfLevels;k++){
 	
-//	imageHeight = 2*imageHeight;
-//	imageWidth = 2*imageWidth;
-//	
-//	w = imageHeight;
-//	padding[0] = (w/2)-2;
-//	padding[1] = (w/2)-1;
-//	padding[2] = (w/2);
+	imageHeight = 2*imageHeight;
+	imageWidth = 2*imageWidth;
+
+	w = imageHeight;
+
 	
 	upTmp1 = cv::Mat(imageHeight/2,imageWidth,CV_64FC1);
 	upTmp2 = cv::Mat(imageHeight/2,imageWidth,CV_64FC1);
@@ -392,9 +395,8 @@ int main(int argc, char *argv[])
 	}
 	
 
-	
-	cv::resize(upTmp1,upTmp3,Size(),1.0,2.0);
-	cv::resize(upTmp2,upTmp4,Size(),1.0,2.0);
+	cv::resize(upTmp1,upTmp3,Size(),1.0,2.0,INTER_LANCZOS4);
+	cv::resize(upTmp2,upTmp4,Size(),1.0,2.0,INTER_LANCZOS4);
 	
 	//Antitrasformata per immagini AA and AD
 	for (i = 0; i < imageWidth; i++) {
@@ -565,8 +567,8 @@ int main(int argc, char *argv[])
 		}
 	}
 		
-	cv::resize(upTmp1,upTmp3,Size(),2.0,1.0);
-	cv::resize(upTmp2,upTmp4,Size(),2.0,1.0);
+	cv::resize(upTmp1,upTmp3,Size(),2.0,1.0,INTER_LANCZOS4);
+	cv::resize(upTmp2,upTmp4,Size(),2.0,1.0,INTER_LANCZOS4);
 
 	//Antitrasformata immagine A
 	for (i = 0; i < imageHeight; i++) {
@@ -637,8 +639,7 @@ int main(int argc, char *argv[])
 			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, w -4))
 			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w -5));
 	}
-//	
-//	
+	
 //	//Antitrasformata immagine D
 	for (i = 0; i < imageHeight; i++) {
 
@@ -715,43 +716,19 @@ int main(int argc, char *argv[])
 		}
 	}
 
-//	for(int i=0;i<imageHeight;i++){
-//		for(int j=0;j<imageWid	th;j++){
-//			 new_image[i][j] = 0.0;
-//		}
-//	}
-
 	}
 
-
-	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
 	
-	
-//	imageHeight = imageHeight* pow(2,nOfLevels);
-//	imageWidth = imageWidth* pow(2,nOfLevels);
-	
-//	for(int i=0;i<imageHeight;i++){
-//		for(int j=0;j<imageWidth;j++){
-//			
-//			 tmp_image.at<double>(i,j) = new_image[i][j];
-//		}
-//	}
-	
-	
-//	for(int i=0;i<imageHeight;i++){
-//		for(int j=0;j<imageWidth;j++){
-//			
-//			 tmp_image.at<double>(i,j) = image.at<double>(i,j) - new_image[i][j];
-//		}
-//	}
-	
-			
-	cv::normalize(tmp_image,final_image,0,255,NORM_MINMAX,CV_8UC1);
-//	
 //	printf("time %lf\n", final_time);
 //	printf("time A e D %lf\n", time_D);
 //	printf("time AA e DD %lf\n", time_DD);
-//	
+//
+
+
+	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
+			
+	cv::normalize(tmp_image,final_image,0,255,NORM_MINMAX,CV_8UC1);
+	
 
 	
 	namedWindow("Serial CDF 9/7",WINDOW_NORMAL);

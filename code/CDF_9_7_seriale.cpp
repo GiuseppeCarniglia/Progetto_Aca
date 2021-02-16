@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
 	int padding[3] = { (w / 2) - 2 ,(w / 2) - 1 ,(w / 2) };
 	
 	double initial_time = 0, final_time = 0;
-	int i=0,j=0,k=0,nOfLevels = atoi(argv[2]);
-	
-	
+	int i=0,j=0,k=0;
+	int nOfLevels = atoi(argv[2]);
+
 	if(nOfLevels<0){
 		perror("N of levels must be >0\n");
 		return 1;
@@ -363,360 +363,360 @@ int main(int argc, char *argv[])
 	printf("Calculating antritransform\n");
 
 
-	Mat upTmp1 ;
-	Mat upTmp2 ;
-	
-	Mat upTmp3 ;
-	Mat upTmp4 ;
-
-	for(k=0;k<nOfLevels;k++){
-	
-	imageHeight = 2*imageHeight;
-	imageWidth = 2*imageWidth;
-
-	w = imageHeight;
-
-	
-	upTmp1 = cv::Mat(imageHeight/2,imageWidth,CV_64FC1);
-	upTmp2 = cv::Mat(imageHeight/2,imageWidth,CV_64FC1);
-	
-	upTmp3 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
-	upTmp4 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
-	
-	
-	for(int i=0; i<imageHeight/2;i++){
-		for(int j=0;j<imageWidth;j++){
-		
-			upTmp1.at<double>(i,j) = tmp_image.at<double>(i,j);
-		
-			upTmp2.at<double>(i,j) = tmp_image.at<double>(i+(imageHeight/2),j);
-		
-		}
-	}
-	
-
-	cv::resize(upTmp1,upTmp3,Size(),1.0,2.0,INTER_LANCZOS4);
-	cv::resize(upTmp2,upTmp4,Size(),1.0,2.0,INTER_LANCZOS4);
-	
-	//Antitrasformata per immagini AA and AD
-	for (i = 0; i < imageWidth; i++) {
-		
-		new_image[0][i] = coefficientsLPR[0] * upTmp3.at<double>(0,i) 
-			+ coefficientsLPR[1] * (upTmp3.at<double>(1,i) + ZERO_VALUE)
-			+ coefficientsLPR[2] * (upTmp3.at<double>(2,i) + ZERO_VALUE)
-			+ coefficientsLPR[3] * (upTmp3.at<double>(3,i) + ZERO_VALUE)
-			+ coefficientsLPR[4] * (upTmp3.at<double>(4,i) + ZERO_VALUE);
-
-		new_image[1][i] = coefficientsLPR[0] * upTmp3.at<double>(1,i) 
-			+ coefficientsLPR[1] * (upTmp3.at<double>(2,i) + upTmp3.at<double>(0,i))
-			+ coefficientsLPR[2] * (upTmp3.at<double>(3,i) + ZERO_VALUE)
-			+ coefficientsLPR[3] * (upTmp3.at<double>(4,i) + ZERO_VALUE)
-			+ coefficientsLPR[4] * (upTmp3.at<double>(5,i) + ZERO_VALUE);
-
-		new_image[2][i] = coefficientsLPR[0] * upTmp3.at<double>(2,i) 
-			+ coefficientsLPR[1] * (upTmp3.at<double>(3,i) + upTmp3.at<double>(1,i))
-			+ coefficientsLPR[2] * (upTmp3.at<double>(4,i) + upTmp3.at<double>(0,i))
-			+ coefficientsLPR[3] * (upTmp3.at<double>(5,i) + ZERO_VALUE)
-			+ coefficientsLPR[4] * (upTmp3.at<double>(6,i) + ZERO_VALUE);
-			
-			
-		new_image[3][i] = coefficientsLPR[0] * upTmp3.at<double>(3,i) 
-			+ coefficientsLPR[1] * (upTmp3.at<double>(4,i) + upTmp3.at<double>(2,i))
-			+ coefficientsLPR[2] * (upTmp3.at<double>(5,i) + upTmp3.at<double>(1,i))
-			+ coefficientsLPR[3] * (upTmp3.at<double>(6,i) + upTmp3.at<double>(0,i))
-			+ coefficientsLPR[4] * (upTmp3.at<double>(7,i) + ZERO_VALUE);
-			
-		for (j = 4; j < w - 4; j++) {
-			new_image[j][i] = coefficientsLPR[0] * upTmp3.at<double>((j),i)
-				+ coefficientsLPR[1] * (upTmp3.at<double>((j) + 1,i) + upTmp3.at<double>((j) - 1,i))
-				+ coefficientsLPR[2] * (upTmp3.at<double>((j) + 2,i) + upTmp3.at<double>((j) - 2,i))
-				+ coefficientsLPR[3] * (upTmp3.at<double>((j) + 3,i) + upTmp3.at<double>((j) - 3,i))
-				+ coefficientsLPR[4] * (upTmp3.at<double>((j) + 4,i) + upTmp3.at<double>((j) - 4,i));
-		}
-
-		new_image[w-4][i] = coefficientsLPR[0] * upTmp3.at<double>(w-4,i)
-			+ coefficientsLPR[1] * (upTmp3.at<double>(w - 3,i) 
-			+ upTmp3.at<double>(w - 5,i))
-			+ coefficientsLPR[2] * (upTmp3.at<double>(w - 2,i) 
-			+ upTmp3.at<double>(w - 6,i))
-			+ coefficientsLPR[3] * (upTmp3.at<double>(w - 1,i) 
-			+ upTmp3.at<double>(w - 7,i))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 8,i));
-
-		new_image[w-3][i] = coefficientsLPR[0]*upTmp3.at<double>(w - 3,i)
-			+ coefficientsLPR[1] * (upTmp3.at<double>(w - 2,i) 
-			+ upTmp3.at<double>(w - 4,i))
-			+ coefficientsLPR[2] * (upTmp3.at<double>(w - 1,i) 
-			+ upTmp3.at<double>(w - 5,i))
-			+ coefficientsLPR[3] * (ZERO_VALUE 
-			+ upTmp3.at<double>(w - 6,i))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 8,i));
-
-		new_image[w - 2][i] = coefficientsLPR[0] * upTmp3.at<double>(w - 2,i)
-			+ coefficientsLPR[1] * (upTmp3.at<double>(w - 1,i) 
-			+ upTmp3.at<double>(w - 3,i))
-			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(w - 4,i))
-			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(w - 5,i))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 6,i));
-
-		new_image[w - 1][i] = coefficientsLPR[0] * upTmp3.at<double>(w - 1,i)
-			+ coefficientsLPR[1] * (ZERO_VALUE + upTmp3.at<double>(w - 2,i))
-			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(w - 3,i))
-			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(w - 4,i))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 5,i));
-	}	
-
-//	//Antitrasformata immagini DA e DD
-	for (i = 0; i < imageWidth; i++) {
-		
-		new_image[0][i] += coefficientsHPR[0] * upTmp4.at<double>(0,i) 
-			+ coefficientsHPR[1] * (upTmp4.at<double>(1,i) + ZERO_VALUE)
-			+ coefficientsHPR[2] * (upTmp4.at<double>(2,i) + ZERO_VALUE)
-			+ coefficientsHPR[3] * (upTmp4.at<double>(3,i) + ZERO_VALUE)
-			+ coefficientsHPR[4] * (upTmp4.at<double>(4,i) + ZERO_VALUE);
-
-		new_image[1][i] += coefficientsHPR[0] * upTmp4.at<double>(1,i) 
-			+ coefficientsHPR[1] * (upTmp4.at<double>(2,i) + upTmp4.at<double>(0,i))
-			+ coefficientsHPR[2] * (upTmp4.at<double>(3,i) + ZERO_VALUE)
-			+ coefficientsHPR[3] * (upTmp4.at<double>(4,i) + ZERO_VALUE)
-			+ coefficientsHPR[4] * (upTmp4.at<double>(5,i) + ZERO_VALUE);
-
-		new_image[2][i] += coefficientsHPR[0] * upTmp4.at<double>(2,i) 
-			+ coefficientsHPR[1] * (upTmp4.at<double>(3,i) + upTmp4.at<double>(1,i))
-			+ coefficientsHPR[2] * (upTmp4.at<double>(4,i) + upTmp4.at<double>(0,i))
-			+ coefficientsHPR[3] * (upTmp4.at<double>(5,i) + ZERO_VALUE)
-			+ coefficientsHPR[4] * (upTmp4.at<double>(6,i) + ZERO_VALUE);
-			
-			
-		new_image[3][i]+= coefficientsHPR[0] * upTmp4.at<double>(3,i) 
-			+ coefficientsHPR[1] * (upTmp4.at<double>(4,i) + upTmp4.at<double>(2,i))
-			+ coefficientsHPR[2] * (upTmp4.at<double>(5,i) + upTmp4.at<double>(1,i))
-			+ coefficientsHPR[3] * (upTmp4.at<double>(6,i) + upTmp4.at<double>(0,i))
-			+ coefficientsHPR[4] * (upTmp4.at<double>(7,i) + ZERO_VALUE);
-			
-		for (j = 4; j < w - 4; j++) {
-			new_image[j][i] += coefficientsHPR[0] * upTmp4.at<double>((j),i)
-				+ coefficientsHPR[1] * (upTmp4.at<double>((j) + 1,i) + upTmp4.at<double>((j) - 1,i))
-				+ coefficientsHPR[2] * (upTmp4.at<double>((j) + 2,i) + upTmp4.at<double>((j) - 2,i))
-				+ coefficientsHPR[3] * (upTmp4.at<double>((j) + 3,i) + upTmp4.at<double>((j) - 3,i))
-				+ coefficientsHPR[4] * (upTmp4.at<double>((j) + 4,i) + upTmp4.at<double>((j) - 4,i));
-		}
-
-		new_image[w-4][i] += coefficientsHPR[0] * upTmp4.at<double>(w-4,i)
-			+ coefficientsHPR[1] * (upTmp4.at<double>(w - 3,i) 
-			+ upTmp4.at<double>(w - 5,i))
-			+ coefficientsHPR[2] * (upTmp4.at<double>(w - 2,i) 
-			+ upTmp4.at<double>(w - 6,i))
-			+ coefficientsHPR[3] * (upTmp4.at<double>(w - 1,i) 
-			+ upTmp4.at<double>(w - 7,i))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 8,i));
-
-		new_image[w-3][i] += coefficientsHPR[0]*upTmp4.at<double>(w - 3,i)
-			+ coefficientsHPR[1] * (upTmp4.at<double>(w - 2,i) 
-			+ upTmp4.at<double>(w - 4,i))
-			+ coefficientsHPR[2] * (upTmp4.at<double>(w - 1,i) 
-			+ upTmp4.at<double>(w - 5,i))
-			+ coefficientsHPR[3] * (ZERO_VALUE 
-			+ upTmp4.at<double>(w - 6,i))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 8,i));
-
-		new_image[w - 2][i] += coefficientsHPR[0] * upTmp4.at<double>(w - 2,i)
-			+ coefficientsHPR[1] * (upTmp4.at<double>(w - 1,i) 
-			+ upTmp4.at<double>(w - 3,i))
-			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(w - 4,i))
-			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(w - 5,i))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 6,i));
-
-		new_image[w - 1][i] += coefficientsHPR[0] * upTmp4.at<double>(w - 1,i)
-			+ coefficientsHPR[1] * (ZERO_VALUE + upTmp4.at<double>(w - 2,i))
-			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(w - 3,i))
-			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(w - 4,i))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 5,i));
-	}
+//	Mat upTmp1 ;
+//	Mat upTmp2 ;
 //	
-	for(int i=0;i<imageHeight;i++){
-		for(int j=0;j<imageWidth;j++){
-			 tmp_image.at<double>(i,j) = new_image[i][j];
-		}
-	}
-	
-	for(int i=0;i<imageHeight;i++){
-		for(int j=0;j<imageWidth;j++){
-			new_image[i][j] = 0.0;
-		}
-	}
+//	Mat upTmp3 ;
+//	Mat upTmp4 ;
 
-	w = imageWidth;
-	padding[0] = (w/2)-2;
-	padding[1] = (w/2)-1;
-	padding[2] = (w/2);
-	
-	upTmp1 = cv::Mat(imageHeight,imageWidth/2,CV_64FC1);
-	upTmp2 = cv::Mat(imageHeight,imageWidth/2,CV_64FC1);
-	
-	upTmp3 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
-	upTmp4 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
-	
-	for(int i=0; i<imageHeight;i++){
-		for(int j=0;j<imageWidth/2;j++){
-		
-			upTmp1.at<double>(i,j) = tmp_image.at<double>(i,j);
-		
-			upTmp2.at<double>(i,j) = tmp_image.at<double>(i,j+(imageWidth/2));
-		
-		}
-	}
-		
-	cv::resize(upTmp1,upTmp3,Size(),2.0,1.0,INTER_LANCZOS4);
-	cv::resize(upTmp2,upTmp4,Size(),2.0,1.0,INTER_LANCZOS4);
+//	for(k=0;k<nOfLevels;k++){
+//	
+//	imageHeight = 2*imageHeight;
+//	imageWidth = 2*imageWidth;
 
-	//Antitrasformata immagine A
-	for (i = 0; i < imageHeight; i++) {
+//	w = imageHeight;
 
-	new_image[i][0] = coefficientsLPR[0] * upTmp3.at<double>(i,0) 
-		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 1) + ZERO_VALUE)
-		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 2) + ZERO_VALUE)
-		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 3) + ZERO_VALUE)
-		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 4) + ZERO_VALUE);
+//	
+//	upTmp1 = cv::Mat(imageHeight/2,imageWidth,CV_64FC1);
+//	upTmp2 = cv::Mat(imageHeight/2,imageWidth,CV_64FC1);
+//	
+//	upTmp3 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+//	upTmp4 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+//	
+//	
+//	for(int i=0; i<imageHeight/2;i++){
+//		for(int j=0;j<imageWidth;j++){
+//		
+//			upTmp1.at<double>(i,j) = tmp_image.at<double>(i,j);
+//		
+//			upTmp2.at<double>(i,j) = tmp_image.at<double>(i+(imageHeight/2),j);
+//		
+//		}
+//	}
+//	
+
+//	cv::resize(upTmp1,upTmp3,Size(),1.0,2.0,INTER_LANCZOS4);
+//	cv::resize(upTmp2,upTmp4,Size(),1.0,2.0,INTER_LANCZOS4);
+//	
+//	//Antitrasformata per immagini AA and AD
+//	for (i = 0; i < imageWidth; i++) {
+//		
+//		new_image[0][i] = coefficientsLPR[0] * upTmp3.at<double>(0,i) 
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(1,i) + ZERO_VALUE)
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(2,i) + ZERO_VALUE)
+//			+ coefficientsLPR[3] * (upTmp3.at<double>(3,i) + ZERO_VALUE)
+//			+ coefficientsLPR[4] * (upTmp3.at<double>(4,i) + ZERO_VALUE);
+
+//		new_image[1][i] = coefficientsLPR[0] * upTmp3.at<double>(1,i) 
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(2,i) + upTmp3.at<double>(0,i))
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(3,i) + ZERO_VALUE)
+//			+ coefficientsLPR[3] * (upTmp3.at<double>(4,i) + ZERO_VALUE)
+//			+ coefficientsLPR[4] * (upTmp3.at<double>(5,i) + ZERO_VALUE);
+
+//		new_image[2][i] = coefficientsLPR[0] * upTmp3.at<double>(2,i) 
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(3,i) + upTmp3.at<double>(1,i))
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(4,i) + upTmp3.at<double>(0,i))
+//			+ coefficientsLPR[3] * (upTmp3.at<double>(5,i) + ZERO_VALUE)
+//			+ coefficientsLPR[4] * (upTmp3.at<double>(6,i) + ZERO_VALUE);
+//			
+//			
+//		new_image[3][i] = coefficientsLPR[0] * upTmp3.at<double>(3,i) 
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(4,i) + upTmp3.at<double>(2,i))
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(5,i) + upTmp3.at<double>(1,i))
+//			+ coefficientsLPR[3] * (upTmp3.at<double>(6,i) + upTmp3.at<double>(0,i))
+//			+ coefficientsLPR[4] * (upTmp3.at<double>(7,i) + ZERO_VALUE);
+//			
+//		for (j = 4; j < w - 4; j++) {
+//			new_image[j][i] = coefficientsLPR[0] * upTmp3.at<double>((j),i)
+//				+ coefficientsLPR[1] * (upTmp3.at<double>((j) + 1,i) + upTmp3.at<double>((j) - 1,i))
+//				+ coefficientsLPR[2] * (upTmp3.at<double>((j) + 2,i) + upTmp3.at<double>((j) - 2,i))
+//				+ coefficientsLPR[3] * (upTmp3.at<double>((j) + 3,i) + upTmp3.at<double>((j) - 3,i))
+//				+ coefficientsLPR[4] * (upTmp3.at<double>((j) + 4,i) + upTmp3.at<double>((j) - 4,i));
+//		}
+
+//		new_image[w-4][i] = coefficientsLPR[0] * upTmp3.at<double>(w-4,i)
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(w - 3,i) 
+//			+ upTmp3.at<double>(w - 5,i))
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(w - 2,i) 
+//			+ upTmp3.at<double>(w - 6,i))
+//			+ coefficientsLPR[3] * (upTmp3.at<double>(w - 1,i) 
+//			+ upTmp3.at<double>(w - 7,i))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 8,i));
+
+//		new_image[w-3][i] = coefficientsLPR[0]*upTmp3.at<double>(w - 3,i)
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(w - 2,i) 
+//			+ upTmp3.at<double>(w - 4,i))
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(w - 1,i) 
+//			+ upTmp3.at<double>(w - 5,i))
+//			+ coefficientsLPR[3] * (ZERO_VALUE 
+//			+ upTmp3.at<double>(w - 6,i))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 8,i));
+
+//		new_image[w - 2][i] = coefficientsLPR[0] * upTmp3.at<double>(w - 2,i)
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(w - 1,i) 
+//			+ upTmp3.at<double>(w - 3,i))
+//			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(w - 4,i))
+//			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(w - 5,i))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 6,i));
+
+//		new_image[w - 1][i] = coefficientsLPR[0] * upTmp3.at<double>(w - 1,i)
+//			+ coefficientsLPR[1] * (ZERO_VALUE + upTmp3.at<double>(w - 2,i))
+//			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(w - 3,i))
+//			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(w - 4,i))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(w - 5,i));
+//	}	
+
+////	//Antitrasformata immagini DA e DD
+//	for (i = 0; i < imageWidth; i++) {
+//		
+//		new_image[0][i] += coefficientsHPR[0] * upTmp4.at<double>(0,i) 
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(1,i) + ZERO_VALUE)
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(2,i) + ZERO_VALUE)
+//			+ coefficientsHPR[3] * (upTmp4.at<double>(3,i) + ZERO_VALUE)
+//			+ coefficientsHPR[4] * (upTmp4.at<double>(4,i) + ZERO_VALUE);
+
+//		new_image[1][i] += coefficientsHPR[0] * upTmp4.at<double>(1,i) 
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(2,i) + upTmp4.at<double>(0,i))
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(3,i) + ZERO_VALUE)
+//			+ coefficientsHPR[3] * (upTmp4.at<double>(4,i) + ZERO_VALUE)
+//			+ coefficientsHPR[4] * (upTmp4.at<double>(5,i) + ZERO_VALUE);
+
+//		new_image[2][i] += coefficientsHPR[0] * upTmp4.at<double>(2,i) 
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(3,i) + upTmp4.at<double>(1,i))
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(4,i) + upTmp4.at<double>(0,i))
+//			+ coefficientsHPR[3] * (upTmp4.at<double>(5,i) + ZERO_VALUE)
+//			+ coefficientsHPR[4] * (upTmp4.at<double>(6,i) + ZERO_VALUE);
+//			
+//			
+//		new_image[3][i]+= coefficientsHPR[0] * upTmp4.at<double>(3,i) 
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(4,i) + upTmp4.at<double>(2,i))
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(5,i) + upTmp4.at<double>(1,i))
+//			+ coefficientsHPR[3] * (upTmp4.at<double>(6,i) + upTmp4.at<double>(0,i))
+//			+ coefficientsHPR[4] * (upTmp4.at<double>(7,i) + ZERO_VALUE);
+//			
+//		for (j = 4; j < w - 4; j++) {
+//			new_image[j][i] += coefficientsHPR[0] * upTmp4.at<double>((j),i)
+//				+ coefficientsHPR[1] * (upTmp4.at<double>((j) + 1,i) + upTmp4.at<double>((j) - 1,i))
+//				+ coefficientsHPR[2] * (upTmp4.at<double>((j) + 2,i) + upTmp4.at<double>((j) - 2,i))
+//				+ coefficientsHPR[3] * (upTmp4.at<double>((j) + 3,i) + upTmp4.at<double>((j) - 3,i))
+//				+ coefficientsHPR[4] * (upTmp4.at<double>((j) + 4,i) + upTmp4.at<double>((j) - 4,i));
+//		}
+
+//		new_image[w-4][i] += coefficientsHPR[0] * upTmp4.at<double>(w-4,i)
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(w - 3,i) 
+//			+ upTmp4.at<double>(w - 5,i))
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(w - 2,i) 
+//			+ upTmp4.at<double>(w - 6,i))
+//			+ coefficientsHPR[3] * (upTmp4.at<double>(w - 1,i) 
+//			+ upTmp4.at<double>(w - 7,i))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 8,i));
+
+//		new_image[w-3][i] += coefficientsHPR[0]*upTmp4.at<double>(w - 3,i)
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(w - 2,i) 
+//			+ upTmp4.at<double>(w - 4,i))
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(w - 1,i) 
+//			+ upTmp4.at<double>(w - 5,i))
+//			+ coefficientsHPR[3] * (ZERO_VALUE 
+//			+ upTmp4.at<double>(w - 6,i))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 8,i));
+
+//		new_image[w - 2][i] += coefficientsHPR[0] * upTmp4.at<double>(w - 2,i)
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(w - 1,i) 
+//			+ upTmp4.at<double>(w - 3,i))
+//			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(w - 4,i))
+//			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(w - 5,i))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 6,i));
+
+//		new_image[w - 1][i] += coefficientsHPR[0] * upTmp4.at<double>(w - 1,i)
+//			+ coefficientsHPR[1] * (ZERO_VALUE + upTmp4.at<double>(w - 2,i))
+//			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(w - 3,i))
+//			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(w - 4,i))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(w - 5,i));
+//	}
+////	
+//	for(int i=0;i<imageHeight;i++){
+//		for(int j=0;j<imageWidth;j++){
+//			 tmp_image.at<double>(i,j) = new_image[i][j];
+//		}
+//	}
+//	
+//	for(int i=0;i<imageHeight;i++){
+//		for(int j=0;j<imageWidth;j++){
+//			new_image[i][j] = 0.0;
+//		}
+//	}
+
+//	w = imageWidth;
+//	padding[0] = (w/2)-2;
+//	padding[1] = (w/2)-1;
+//	padding[2] = (w/2);
+//	
+//	upTmp1 = cv::Mat(imageHeight,imageWidth/2,CV_64FC1);
+//	upTmp2 = cv::Mat(imageHeight,imageWidth/2,CV_64FC1);
+//	
+//	upTmp3 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+//	upTmp4 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
+//	
+//	for(int i=0; i<imageHeight;i++){
+//		for(int j=0;j<imageWidth/2;j++){
+//		
+//			upTmp1.at<double>(i,j) = tmp_image.at<double>(i,j);
+//		
+//			upTmp2.at<double>(i,j) = tmp_image.at<double>(i,j+(imageWidth/2));
+//		
+//		}
+//	}
+//		
+//	cv::resize(upTmp1,upTmp3,Size(),2.0,1.0,INTER_LANCZOS4);
+//	cv::resize(upTmp2,upTmp4,Size(),2.0,1.0,INTER_LANCZOS4);
+
+//	//Antitrasformata immagine A
+//	for (i = 0; i < imageHeight; i++) {
+
+//	new_image[i][0] = coefficientsLPR[0] * upTmp3.at<double>(i,0) 
+//		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 1) + ZERO_VALUE)
+//		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 2) + ZERO_VALUE)
+//		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 3) + ZERO_VALUE)
+//		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 4) + ZERO_VALUE);
 
 
-	new_image[i][1] = coefficientsLPR[0] * upTmp3.at<double>(i, 1) 
-		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 2) + upTmp3.at<double>(i, 0))
-		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 3) + ZERO_VALUE)
-		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 4) + ZERO_VALUE)
-		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 5) + ZERO_VALUE);
+//	new_image[i][1] = coefficientsLPR[0] * upTmp3.at<double>(i, 1) 
+//		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 2) + upTmp3.at<double>(i, 0))
+//		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 3) + ZERO_VALUE)
+//		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 4) + ZERO_VALUE)
+//		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 5) + ZERO_VALUE);
 
-	
-	new_image[i][2] = coefficientsLPR[0] * upTmp3.at<double>(i, 2) 
-		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 3) + upTmp3.at<double>(i, 1))
-		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 4) + upTmp3.at<double>(i, 0))
-		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 5) + ZERO_VALUE)
-		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 6) + ZERO_VALUE);
+//	
+//	new_image[i][2] = coefficientsLPR[0] * upTmp3.at<double>(i, 2) 
+//		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 3) + upTmp3.at<double>(i, 1))
+//		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 4) + upTmp3.at<double>(i, 0))
+//		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 5) + ZERO_VALUE)
+//		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 6) + ZERO_VALUE);
 
-	new_image[i][3] = coefficientsLPR[0] * upTmp3.at<double>(i, 3) 
-		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 4) + upTmp3.at<double>(i, 2))
-		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 5) + upTmp3.at<double>(i, 1))
-		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 6) + upTmp3.at<double>(i, 0))
-		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 7) + ZERO_VALUE);
-
-
-	for (j = 4; j < (w) - 2; j++) {
-		new_image[i][j] = coefficientsLPR[0] * upTmp3.at<double>(i, (j))
-				+ coefficientsLPR[1] * (upTmp3.at<double>(i, (j) + 1) + upTmp3.at<double>(i, (j) - 1))
-				+ coefficientsLPR[2] * (upTmp3.at<double>(i, (j) + 2) + upTmp3.at<double>(i, (j) - 2))
-				+ coefficientsLPR[3] * (upTmp3.at<double>(i, (j) + 3) + upTmp3.at<double>(i, (j) - 3))
-				+ coefficientsLPR[4] * (upTmp3.at<double>(i, (j) + 4) + upTmp3.at<double>(i, (j) - 4));
-			
-			
-		}
-
-		new_image[i][w - 4] = coefficientsLPR[0] * upTmp3.at<double>(i,w - 4)
-			+ coefficientsLPR[1] * (upTmp3.at<double>(i, w - 3) 
-			+ upTmp3.at<double>(i, w - 5))
-			+ coefficientsLPR[2] * (upTmp3.at<double>(i, w - 2) 
-			+ upTmp3.at<double>(i, w - 6))
-			+ coefficientsLPR[3] * (upTmp3.at<double>(i, w - 1) 
-			+ upTmp3.at<double>(i, w - 7))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w - 8));
-
-		new_image[i][w - 3] = coefficientsLPR[0] * upTmp3.at<double>(i,w - 3)
-			+ coefficientsLPR[1] * (upTmp3.at<double>(i, w - 2) + upTmp3.at<double>(i, w - 4))
-			+ coefficientsLPR[2] * (upTmp3.at<double>(i, w - 1) + upTmp3.at<double>(i, w - 5))
-			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, w - 6))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w - 7));
+//	new_image[i][3] = coefficientsLPR[0] * upTmp3.at<double>(i, 3) 
+//		+ coefficientsLPR[1] * (upTmp3.at<double>(i, 4) + upTmp3.at<double>(i, 2))
+//		+ coefficientsLPR[2] * (upTmp3.at<double>(i, 5) + upTmp3.at<double>(i, 1))
+//		+ coefficientsLPR[3] * (upTmp3.at<double>(i, 6) + upTmp3.at<double>(i, 0))
+//		+ coefficientsLPR[4] * (upTmp3.at<double>(i, 7) + ZERO_VALUE);
 
 
-		new_image[i][w - 2] = coefficientsLPR[0] * upTmp3.at<double>(i, w - 2)
-			+ coefficientsLPR[1] * (upTmp3.at<double>(i,w - 2 + 1) 
-			+ upTmp3.at<double>(i, w - 2 - 1))
-			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(i, w - 2 - 2))
-			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, w - 2 - 3))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w - 2 - 4));
+//	for (j = 4; j < (w) - 2; j++) {
+//		new_image[i][j] = coefficientsLPR[0] * upTmp3.at<double>(i, (j))
+//				+ coefficientsLPR[1] * (upTmp3.at<double>(i, (j) + 1) + upTmp3.at<double>(i, (j) - 1))
+//				+ coefficientsLPR[2] * (upTmp3.at<double>(i, (j) + 2) + upTmp3.at<double>(i, (j) - 2))
+//				+ coefficientsLPR[3] * (upTmp3.at<double>(i, (j) + 3) + upTmp3.at<double>(i, (j) - 3))
+//				+ coefficientsLPR[4] * (upTmp3.at<double>(i, (j) + 4) + upTmp3.at<double>(i, (j) - 4));
+//			
+//			
+//		}
 
-		new_image[i][w -1] = coefficientsLPR[0] * upTmp3.at<double>(i, w - 1)
-			+ coefficientsLPR[1] * (ZERO_VALUE + upTmp3.at<double>(i, w -2))
-			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(i, w -3))
-			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, w -4))
-			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w -5));
-	}
-	
-//	//Antitrasformata immagine D
-	for (i = 0; i < imageHeight; i++) {
+//		new_image[i][w - 4] = coefficientsLPR[0] * upTmp3.at<double>(i,w - 4)
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(i, w - 3) 
+//			+ upTmp3.at<double>(i, w - 5))
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(i, w - 2) 
+//			+ upTmp3.at<double>(i, w - 6))
+//			+ coefficientsLPR[3] * (upTmp3.at<double>(i, w - 1) 
+//			+ upTmp3.at<double>(i, w - 7))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w - 8));
 
-	new_image[i][0] += coefficientsHPR[0] * upTmp4.at<double>(i,0) 
-		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 1) + ZERO_VALUE)
-		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 2) + ZERO_VALUE)
-		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 3) + ZERO_VALUE)
-		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 4) + ZERO_VALUE);
-
-
-	new_image[i][1] += coefficientsHPR[0] * upTmp4.at<double>(i, 1) 
-		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 2) + upTmp4.at<double>(i, 0))
-		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 3) + ZERO_VALUE)
-		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 4) + ZERO_VALUE)
-		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 5) + ZERO_VALUE);
-
-	
-	new_image[i][2] += coefficientsHPR[0] * upTmp4.at<double>(i, 2) 
-		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 3) + upTmp4.at<double>(i, 1))
-		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 4) + upTmp4.at<double>(i, 0))
-		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 5) + ZERO_VALUE)
-		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 6) + ZERO_VALUE);
-
-	new_image[i][3] += coefficientsHPR[0] * upTmp4.at<double>(i, 3) 
-		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 4) + upTmp4.at<double>(i, 2))
-		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 5) + upTmp4.at<double>(i, 1))
-		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 6) + upTmp4.at<double>(i, 0))
-		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 7) + ZERO_VALUE);
+//		new_image[i][w - 3] = coefficientsLPR[0] * upTmp3.at<double>(i,w - 3)
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(i, w - 2) + upTmp3.at<double>(i, w - 4))
+//			+ coefficientsLPR[2] * (upTmp3.at<double>(i, w - 1) + upTmp3.at<double>(i, w - 5))
+//			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, w - 6))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w - 7));
 
 
-	for (j = 4; j < (w) - 2; j++) {
-		new_image[i][j] += coefficientsHPR[0] * upTmp4.at<double>(i, (j))
-				+ coefficientsHPR[1] * (upTmp4.at<double>(i, (j) + 1) + upTmp4.at<double>(i, (j) - 1))
-				+ coefficientsHPR[2] * (upTmp4.at<double>(i, (j) + 2) + upTmp4.at<double>(i, (j) - 2))
-				+ coefficientsHPR[3] * (upTmp4.at<double>(i, (j) + 3) + upTmp4.at<double>(i, (j) - 3))
-				+ coefficientsHPR[4] * (upTmp4.at<double>(i, (j) + 4) + upTmp4.at<double>(i, (j) - 4));
-			
-			
-		}
+//		new_image[i][w - 2] = coefficientsLPR[0] * upTmp3.at<double>(i, w - 2)
+//			+ coefficientsLPR[1] * (upTmp3.at<double>(i,w - 2 + 1) 
+//			+ upTmp3.at<double>(i, w - 2 - 1))
+//			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(i, w - 2 - 2))
+//			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, w - 2 - 3))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w - 2 - 4));
 
-		new_image[i][w - 4] += coefficientsHPR[0] * upTmp4.at<double>(i,w - 4)
-			+ coefficientsHPR[1] * (upTmp4.at<double>(i, w - 3) 
-			+ upTmp4.at<double>(i, w - 5))
-			+ coefficientsHPR[2] * (upTmp4.at<double>(i, w - 2) 
-			+ upTmp4.at<double>(i, w - 6))
-			+ coefficientsHPR[3] * (upTmp4.at<double>(i, w - 1) 
-			+ upTmp4.at<double>(i, w - 7))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w - 8));
+//		new_image[i][w -1] = coefficientsLPR[0] * upTmp3.at<double>(i, w - 1)
+//			+ coefficientsLPR[1] * (ZERO_VALUE + upTmp3.at<double>(i, w -2))
+//			+ coefficientsLPR[2] * (ZERO_VALUE + upTmp3.at<double>(i, w -3))
+//			+ coefficientsLPR[3] * (ZERO_VALUE + upTmp3.at<double>(i, w -4))
+//			+ coefficientsLPR[4] * (ZERO_VALUE + upTmp3.at<double>(i, w -5));
+//	}
+//	
+////	//Antitrasformata immagine D
+//	for (i = 0; i < imageHeight; i++) {
 
-		new_image[i][w - 3] += coefficientsHPR[0] * upTmp4.at<double>(i,w - 3)
-			+ coefficientsHPR[1] * (upTmp4.at<double>(i, w - 2) + upTmp4.at<double>(i, w - 4))
-			+ coefficientsHPR[2] * (upTmp4.at<double>(i, w - 1) + upTmp4.at<double>(i, w - 5))
-			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, w - 6))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w - 7));
+//	new_image[i][0] += coefficientsHPR[0] * upTmp4.at<double>(i,0) 
+//		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 1) + ZERO_VALUE)
+//		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 2) + ZERO_VALUE)
+//		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 3) + ZERO_VALUE)
+//		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 4) + ZERO_VALUE);
 
 
-		new_image[i][w - 2] += coefficientsHPR[0] * upTmp4.at<double>(i, w - 2)
-			+ coefficientsHPR[1] * (upTmp4.at<double>(i,w - 2 + 1) 
-			+ upTmp4.at<double>(i, w - 2 - 1))
-			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(i, w - 2 - 2))
-			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, w - 2 - 3))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w - 2 - 4));
+//	new_image[i][1] += coefficientsHPR[0] * upTmp4.at<double>(i, 1) 
+//		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 2) + upTmp4.at<double>(i, 0))
+//		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 3) + ZERO_VALUE)
+//		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 4) + ZERO_VALUE)
+//		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 5) + ZERO_VALUE);
 
-		new_image[i][w -1] += coefficientsHPR[0] * upTmp4.at<double>(i, w - 1)
-			+ coefficientsHPR[1] * (ZERO_VALUE + upTmp4.at<double>(i, w -2))
-			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(i, w -3))
-			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, w -4))
-			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w -5));
-	}
+//	
+//	new_image[i][2] += coefficientsHPR[0] * upTmp4.at<double>(i, 2) 
+//		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 3) + upTmp4.at<double>(i, 1))
+//		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 4) + upTmp4.at<double>(i, 0))
+//		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 5) + ZERO_VALUE)
+//		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 6) + ZERO_VALUE);
 
-	for(int i=0;i<imageHeight;i++){
-		for(int j=0;j<imageWidth;j++){
-			 tmp_image.at<double>(i,j) = new_image[i][j];
-		}
-	}
+//	new_image[i][3] += coefficientsHPR[0] * upTmp4.at<double>(i, 3) 
+//		+ coefficientsHPR[1] * (upTmp4.at<double>(i, 4) + upTmp4.at<double>(i, 2))
+//		+ coefficientsHPR[2] * (upTmp4.at<double>(i, 5) + upTmp4.at<double>(i, 1))
+//		+ coefficientsHPR[3] * (upTmp4.at<double>(i, 6) + upTmp4.at<double>(i, 0))
+//		+ coefficientsHPR[4] * (upTmp4.at<double>(i, 7) + ZERO_VALUE);
 
-	}
+
+//	for (j = 4; j < (w) - 2; j++) {
+//		new_image[i][j] += coefficientsHPR[0] * upTmp4.at<double>(i, (j))
+//				+ coefficientsHPR[1] * (upTmp4.at<double>(i, (j) + 1) + upTmp4.at<double>(i, (j) - 1))
+//				+ coefficientsHPR[2] * (upTmp4.at<double>(i, (j) + 2) + upTmp4.at<double>(i, (j) - 2))
+//				+ coefficientsHPR[3] * (upTmp4.at<double>(i, (j) + 3) + upTmp4.at<double>(i, (j) - 3))
+//				+ coefficientsHPR[4] * (upTmp4.at<double>(i, (j) + 4) + upTmp4.at<double>(i, (j) - 4));
+//			
+//			
+//		}
+
+//		new_image[i][w - 4] += coefficientsHPR[0] * upTmp4.at<double>(i,w - 4)
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(i, w - 3) 
+//			+ upTmp4.at<double>(i, w - 5))
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(i, w - 2) 
+//			+ upTmp4.at<double>(i, w - 6))
+//			+ coefficientsHPR[3] * (upTmp4.at<double>(i, w - 1) 
+//			+ upTmp4.at<double>(i, w - 7))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w - 8));
+
+//		new_image[i][w - 3] += coefficientsHPR[0] * upTmp4.at<double>(i,w - 3)
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(i, w - 2) + upTmp4.at<double>(i, w - 4))
+//			+ coefficientsHPR[2] * (upTmp4.at<double>(i, w - 1) + upTmp4.at<double>(i, w - 5))
+//			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, w - 6))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w - 7));
+
+
+//		new_image[i][w - 2] += coefficientsHPR[0] * upTmp4.at<double>(i, w - 2)
+//			+ coefficientsHPR[1] * (upTmp4.at<double>(i,w - 2 + 1) 
+//			+ upTmp4.at<double>(i, w - 2 - 1))
+//			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(i, w - 2 - 2))
+//			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, w - 2 - 3))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w - 2 - 4));
+
+//		new_image[i][w -1] += coefficientsHPR[0] * upTmp4.at<double>(i, w - 1)
+//			+ coefficientsHPR[1] * (ZERO_VALUE + upTmp4.at<double>(i, w -2))
+//			+ coefficientsHPR[2] * (ZERO_VALUE + upTmp4.at<double>(i, w -3))
+//			+ coefficientsHPR[3] * (ZERO_VALUE + upTmp4.at<double>(i, w -4))
+//			+ coefficientsHPR[4] * (ZERO_VALUE + upTmp4.at<double>(i, w -5));
+//	}
+
+//	for(int i=0;i<imageHeight;i++){
+//		for(int j=0;j<imageWidth;j++){
+//			 tmp_image.at<double>(i,j) = new_image[i][j];
+//		}
+//	}
+
+//	}
 
 	
 //	printf("time %lf\n", final_time);
@@ -725,18 +725,18 @@ int main(int argc, char *argv[])
 //
 
 
-	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
-			
-	cv::normalize(tmp_image,final_image,0,255,NORM_MINMAX,CV_8UC1);
-	
+//	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
+//			
+//	cv::normalize(tmp_image,final_image,0,255,NORM_MINMAX,CV_8UC1);
+//	
 
-	
-	namedWindow("Serial CDF 9/7",WINDOW_NORMAL);
-	if(image.rows >=1920 || image.cols >= 1080){
-		cv::resizeWindow("Serial CDF 9/7",1920,1080);
-	}
-	imshow("Serial CDF 9/7",final_image);
-	waitKey(0);
+//	
+//	namedWindow("Serial CDF 9/7",WINDOW_NORMAL);
+//	if(image.rows >=1920 || image.cols >= 1080){
+//		cv::resizeWindow("Serial CDF 9/7",1920,1080);
+//	}
+//	imshow("Serial CDF 9/7",final_image);
+//	waitKey(0);
 
 //Functions to save image on disk
 //	vector<int> compression_params;

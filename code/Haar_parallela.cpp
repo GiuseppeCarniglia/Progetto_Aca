@@ -74,16 +74,11 @@ int main(int argc, char* argv[]) {
 		w = w/2;	
 
 	}
-
-	time_DD = omp_get_wtime();
-	time_DD -= time_AA;
 	
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
 
 	printf("time: %lf \n", final_time);
-	printf("time A e D: %lf \n", time_D);
-	printf("time AA e DD: %lf \n", time_DD);
 
 //Instructions to save the final image on disk 
 /*	vector<int> compression_params;

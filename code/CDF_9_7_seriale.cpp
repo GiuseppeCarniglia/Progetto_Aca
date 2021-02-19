@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
 	int imageWidth = image.size().width;
 //	//Mat new_image = cv::Mat(imageHeight,imageWidth,CV_16C1);
 //	
-	printf("%d %d\n",imageHeight,imageWidth);
 	double	*row,**new_image;
 	
 	row = (double*)malloc(imageHeight * imageWidth * sizeof(*row));
@@ -71,13 +70,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	double time_A=0,time_D=0,time_AA=0,time_DD=0;
-	initial_time = omp_get_wtime();
+	double time_serial =0,time_serial_start=0,time_serial_end=0;
 
-	
-	time_A = omp_get_wtime();
-	
-	
 	for(int i=0;i<imageHeight;i++){
 		for(int j=0;j<imageWidth;j++){
 			
@@ -85,6 +79,8 @@ int main(int argc, char *argv[])
 		}
 	}
 		
+	initial_time = omp_get_wtime();
+    
 	for(k=0;k<nOfLevels;k++){
 //	Calculations for matrix A
 	for (i = 0; i < imageHeight; i++) {
@@ -194,9 +190,7 @@ int main(int argc, char *argv[])
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<double>(i, (padding[2]<<1) - 4));
 	}
 
-//	time_D = omp_get_wtime();
-//	time_D -= time_A;
-	
+    time_serial_start = omp_get_wtime();
 
 	for(int i=0;i<imageHeight;i++){
 		for(int j=0;j<imageWidth;j++){
@@ -208,9 +202,11 @@ int main(int argc, char *argv[])
 	padding[0] = (w/2)-2;
 	padding[1] = (w/2)-1;
 	padding[2] = (w/2);
-	
-	time_AA =  omp_get_wtime();
-	
+
+    time_serial_end = omp_get_wtime();
+
+    time_serial += (time_serial_end - time_serial_start);
+
 	//Calculations for matrices AA and DA
 	for (i = 0; i < imageWidth; i++) {
 		
@@ -333,14 +329,16 @@ int main(int argc, char *argv[])
 
 	}
 
-//	time_DD = omp_get_wtime();
-//	time_DD -= time_AA;
-//	final_time = omp_get_wtime();
-//	final_time -= initial_time;
-//	
-//	
-//	
-	for(int i=0;i<image.rows;i++){
+    final_time = omp_get_wtime();
+
+
+    final_time = final_time - initial_time - time_serial;
+    
+    printf("%lf %lf\n", final_time, time_serial);
+
+    //Utili per visualizzare l'immagine ma non per raccogliere i tempi di esecuzione
+	/*
+    for(int i=0;i<image.rows;i++){
 		for(int j=0;j<image.cols;j++){
 			 tmp_image.at<double>(i,j) = image.at<double>(i,j);
 		}
@@ -351,7 +349,7 @@ int main(int argc, char *argv[])
 			new_image[i][j] = 0.0;
 		}
 	}
-
+    */
 
 				
 
@@ -360,7 +358,7 @@ int main(int argc, char *argv[])
 //===============================================================================================
 
 
-	printf("Calculating antritransform\n");
+//  printf("Calculating antritransform\n");
 
 
 //	Mat upTmp1 ;

@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
 	int k = 0;
 	
 	double initial_time = 0, final_time = 0;
+    double time_serial = 0, time_serial_start = 0, time_serial_end = 0;
 	int temp_row = 0;
 	int temp_col = 0;
 
@@ -44,13 +45,11 @@ int main(int argc, char* argv[]) {
 	w = (image.cols);
 	k = (image.rows);
 	
-	double time_A=0,time_D=0,time_AA=0,time_DD=0;
 	
 	initial_time = omp_get_wtime();
 	
 	//immagine A e D			
 	omp_set_num_threads(omp_get_max_threads());
-	time_A = omp_get_wtime();
 	for(t=0;t<nOfLevels;t++){
 	
 	#pragma omp parallel for private(i,j) schedule(static)
@@ -63,10 +62,6 @@ int main(int argc, char* argv[]) {
 		}
 	}
 		
-	time_D = omp_get_wtime();
-	time_D -= time_A;
-
-	time_AA = omp_get_wtime();
 	#pragma omp parallel for private(i,j) schedule(static)
 	for (i = 0; i < w; i++) {		
 		for (j = 0; j < k/2; j++) {
@@ -103,13 +98,14 @@ int main(int argc, char* argv[]) {
 	waitKey(0);*/
 	
 	
-	cv::Mat final_image(image.rows, image.cols, CV_8UC1);
+	/*cv::Mat final_image(image.rows, image.cols, CV_8UC1);
 	
 	
 	cv::normalize(image, final_image, 0, 255, NORM_MINMAX,CV_8UC1);
 	
 	imshow("Parallel Haar",final_image);
 	waitKey(0);
+*/
 	return 0;
 }
 

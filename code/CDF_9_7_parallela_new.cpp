@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 	int padding[3] = {(imageWidth/2) - 2 ,(imageWidth/2) - 1 ,(imageWidth/2)};
 
 
-	double initial_time = 0, final_time = 0;
+	double initial_time = 0, final_time = 0, time_serial = 0, time_serial_start = 0, time_serial_end = 0;
 	
 	if(image.empty()){
 		perror("Immagine vuota\n");
@@ -54,10 +54,8 @@ int main(int argc, char* argv[])
 	int nOfLevels = atoi(argv[2]);
 	int k=0;
 
-	double time_A=0,time_D=0,time_AA=0,time_DD=0;
 	
 	initial_time = omp_get_wtime();
-	time_A = omp_get_wtime();
 	
 	for(k=0;k<nOfLevels;k++){
 	
@@ -174,9 +172,8 @@ int main(int argc, char* argv[])
 		}
 	}	
     
-    		time_D = omp_get_wtime();
-    		time_D -= time_A; // Execution time of matrices A and D
-    
+        time_serial_start = omp_get_wtime();
+
 		padding[0] = (imageHeight/ 2) - 2;
 		padding[1] = (imageHeight/ 2) - 1;
 		padding[2] = (imageHeight/ 2);
@@ -186,9 +183,11 @@ int main(int argc, char* argv[])
 		
 		tmp_image_1 = cv::Mat(imageHeight,imageWidth,CV_64FC1);
 		tmp_image_2 = cv::Mat(imageHeight,imageWidth,CV_64FC1);	
+	
+        time_serial_end = omp_get_wtime();
+
+        time_serial += (time_serial_end - time_serial_start);
 		
-		
-		time_AA = omp_get_wtime();
         #pragma omp parallel
         {
 		#pragma omp for private(i,j) schedule(static)
@@ -322,17 +321,12 @@ int main(int argc, char* argv[])
 
         
 	}
-        time_DD = omp_get_wtime();
-        time_DD -= time_AA; // Execution time of matrices AA, AD,DA and DD
         	
 	final_time = omp_get_wtime();
-	final_time -= initial_time;	
-	printf("time %lf\n", final_time);
+	final_time -= initial_time - time_serial;
+	printf("%lf %lf\n", final_time, time_serial);
 	
-	printf("time A e D %lf\n", time_D);
-	printf("time AA e DD %lf\n", time_DD);
-
-        
+/*        
     	cv::Mat final_image(imageHeight, imageWidth, CV_8UC1);
     	
     	cv::normalize(new_image, final_image, 0,255,NORM_MINMAX, CV_8UC1);
@@ -345,7 +339,7 @@ int main(int argc, char* argv[])
    
     	imshow("Parallel CDF 9/7", final_image);
     	waitKey(0);
-    	
+*/
 /*	vector<int> compression_params;
 
 	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);

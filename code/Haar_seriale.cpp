@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 		
 	int w = 0;
 
-	double initial_time = 0, final_time = 0;
+	double initial_time = 0, final_time = 0, time_serial = 0, time_serial_start = 0, time_serial_end = 0;
 	int temp_row = 0;
 	int temp_col = 0;
 
@@ -61,46 +61,27 @@ int main(int argc, char *argv[]) {
 	temp_row = (image.rows);
 	temp_col = (image.cols);
 
-	double time_A = 0;
-	double time_D = 0;
-	double time_AA = 0;
-	double time_DD = 0;
-
-		
 	w = imageWidth;
 
 
 	initial_time = omp_get_wtime();
 
-	time_A = omp_get_wtime();
 	//immagine A e D
 	for(k=0;k<nOfLevels;k++){
 
-	for (i = 0; i < imageHeight; i++)
-	{
-		
-
-		for (j = 0; j < imageWidth / 2; j++) {
-			dst.at<double>(i,j) = (image.at<double>(i,2*j) + image.at<double>(i,2*j + 1)) / 2;
+    	for (i = 0; i < imageHeight; i++){
+    		for (j = 0; j < imageWidth / 2; j++) {
+    			dst.at<double>(i,j) = (image.at<double>(i,2*j) + image.at<double>(i,2*j + 1)) / 2;
 			
-			dst.at<double>(i,j+(w/2)) = (image.at<double>(i,2*j) - image.at<double>(i,2*j+1))/2;
-		}
-	}
+    			dst.at<double>(i,j+(w/2)) = (image.at<double>(i,2*j) - image.at<double>(i,2*j+1))/2;
+    		}
+    	}
 
-////	Redundant code is possible to eliminate but would change execution times so for 
-////	consistency we kept it
-//	for (int i = 0; i < temp_row; i++) {
-//		for (int j = 0; j < temp_col; j++) {
-//			image.at<double>(i, j) = dst.at<double>(i, j);
-//		}
-//	}
+        time_serial_start = omp_get_wtime();
+	    w = imageHeight;
+        time_serial_end = omp_get_wtime();
+        time_serial += (time_serial_end - time_serial_start);
 
-	time_D = omp_get_wtime();
-	time_D -= time_A; // execution time of first calculation
-
-	w = imageHeight;
-        
-        time_AA = omp_get_wtime();
 		for (int i = 0; i < imageHeight / 2; i++) {
 
 			for(int j=0;j<imageWidth;j++){
@@ -123,18 +104,13 @@ int main(int argc, char *argv[]) {
 		w = imageWidth;
 		
 		
-        }
-        time_DD = omp_get_wtime();
-        time_DD -= time_AA; // execution time of second calculation
+    }
         
 	final_time = omp_get_wtime();
-	final_time -= initial_time;
-	printf("time: %lf \n", final_time);
+	final_time -= initial_time - serial_time;
+	printf("%lf %lf\n", final_time,serial_time);
 
-	printf("time immagini A e D: %lf \n", time_D);
-
-    
-	printf("time immagini AA e DA: %lf \n", time_DD);
+	/*printf("time immagini AA e DA: %lf \n", time_DD);
 	
 	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
 	
@@ -147,7 +123,7 @@ int main(int argc, char *argv[]) {
 	cv::normalize(antitransform,final_image, 0,255,NORM_MINMAX,CV_8UC1);
 	
 	imshow("Haar antitransform serial",final_image);
-	
+	*/
 //	image_difference = diff_of_images(image_original, antitransform);
 
 //	double min, max;

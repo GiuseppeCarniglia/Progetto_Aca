@@ -11,12 +11,12 @@ ITERATION_NUMBER="$4"
 
 OUTPUT_FILE="$5"
 
-if [ $# -ne 5 ]
+if [[ $# -ne 5 ]]
 then 
     echo "Usage: bash single_image.sh program-to-execute image-to-process number_of_levels number-of-iterations output-file"
 fi
 
-if [ -e "$OUTPUT_FILE" ]
+if [[ -e "$OUTPUT_FILE" ]]
 then
     rm "$OUTPUT_FILE"
 fi

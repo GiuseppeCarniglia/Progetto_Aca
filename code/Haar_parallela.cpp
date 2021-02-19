@@ -8,7 +8,7 @@
 using namespace cv;
 using namespace std;
 
-#define ZERO_VALUE (uchar)0
+#define ZERO_VALUE (double)0
 
 
 
@@ -22,8 +22,9 @@ Mat Haar_antitrasformata(Mat immagine_trasformata);
 int main(int argc, char* argv[]) {
 	const char* imgName = argv[1];
 	Mat image = imread(imgName, IMREAD_GRAYSCALE);
+	image.convertTo(image,CV_64FC1);
 	
-	Mat dst = cv::Mat(image.rows,image.cols,CV_8UC1);
+	Mat dst = cv::Mat(image.rows,image.cols,CV_64FC1);
 	int imageWidth = image.size().width;
 	int w = 0;
 	int k = 0;
@@ -34,6 +35,8 @@ int main(int argc, char* argv[]) {
 
 	int i=0;
 	int j=0;
+	int t=0;
+	int nOfLevels = atoi(argv[2]);
 	
 	temp_row = (image.rows);
 	temp_col = (image.cols);
@@ -48,27 +51,18 @@ int main(int argc, char* argv[]) {
 	//immagine A e D			
 	omp_set_num_threads(omp_get_max_threads());
 	time_A = omp_get_wtime();
+	for(t=0;t<nOfLevels;t++){
+	
 	#pragma omp parallel for private(i,j) schedule(static)
-	for (i = 0; i < temp_row; i++) 
+	for (i = 0; i < k; i++) 
 	{
 		for (j = 0; j < w/2; j++) {
-			dst.at<uchar>(i, j) = (image.at<uchar>(i,2*j) + image.at<uchar>(i,2*j + 1)) / 2;
+			dst.at<double>(i, j) = (image.at<double>(i,2*j) + image.at<double>(i,2*j + 1)) / 2;
 			
-			dst.at<uchar>(i, j+(w/2)) = (image.at<uchar>(i,2*j) - image.at<uchar>(i,2*j+1))/2;
+			dst.at<double>(i, j+(w/2)) = (image.at<double>(i,2*j) - image.at<double>(i,2*j+1))/2;
 		}
+	}
 		
-		//printf("N Threads. %d, Thread ID %d\n",omp_get_num_threads(), omp_get_thread_num());
-	}
-	
-	//Redundant code is possible to eliminate but would change execution times so for 
-	//consistency we kept it
-	#pragma omp for private(i,j) schedule(static)
-	for (i = 0; i < temp_row; i++) {
-		for (j = 0; j < temp_col; j++) {
-			image.at<uchar>(i, j) = dst.at<uchar>(i, j);
-		}
-	}
-	
 	time_D = omp_get_wtime();
 	time_D -= time_A;
 
@@ -76,18 +70,14 @@ int main(int argc, char* argv[]) {
 	#pragma omp parallel for private(i,j) schedule(static)
 	for (i = 0; i < w; i++) {		
 		for (j = 0; j < k/2; j++) {
-			dst.at<uchar>(j, i) = (image.at<uchar>(2*j,i) + image.at<uchar>(2*j + 1, i)) / 2;
-			dst.at<uchar>(j+(k/2), i) = (image.at<uchar>(2*j,i) - image.at<uchar>(2*j+1,i))/2;
+			image.at<double>(j, i) = (dst.at<double>(2*j,i) + dst.at<double>(2*j + 1, i)) / 2;
+			image.at<double>(j+(k/2), i) = (dst.at<double>(2*j,i) - dst.at<double>(2*j+1,i))/2;
 		}
 	}
 	
-	//Redundant code is possible to eliminate but would change execution times so for 
-	//consistency we kept it
-	#pragma omp for private(i,j) schedule(static)
-	for (i = 0; i < w; i++) {
-		for (j = 0; j < k; j++) {
-			image.at<uchar>(j, i) = dst.at<uchar>(j,i);
-		}
+		k = k/2;
+		w = w/2;	
+
 	}
 
 	time_DD = omp_get_wtime();
@@ -112,7 +102,13 @@ int main(int argc, char* argv[]) {
 	
 	waitKey(0);*/
 	
-	imshow("Parallel Haar",image);
+	
+	cv::Mat final_image(image.rows, image.cols, CV_8UC1);
+	
+	
+	cv::normalize(image, final_image, 0, 255, NORM_MINMAX,CV_8UC1);
+	
+	imshow("Parallel Haar",final_image);
 	waitKey(0);
 	return 0;
 }
@@ -132,9 +128,9 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 	#pragma omp parallel for private(i,j) schedule(static)
 	for(i=0;i<k/2;i++){
 		for(j=0;j<w;j++){
-			image_out.at<uchar>(2*i,j) = immagine_trasformata.at<uchar>(i,j) + immagine_trasformata.at<uchar>(i+(k/2),j);
+			image_out.at<double>(2*i,j) = immagine_trasformata.at<double>(i,j) + immagine_trasformata.at<double>(i+(k/2),j);
 			
-			image_out.at<uchar>(2*i+1,j) = immagine_trasformata.at<uchar>(i,j) -  immagine_trasformata.at<uchar>(i+(k/2),j);
+			image_out.at<double>(2*i+1,j) = immagine_trasformata.at<double>(i,j) -  immagine_trasformata.at<double>(i+(k/2),j);
 			
 		}
 	}
@@ -142,9 +138,9 @@ Mat Haar_antitrasformata(Mat immagine_trasformata){
 	#pragma omp parallel for private(i,j) schedule(static)
 	for(i=0;i<k;i++){
 		for(j=0;j<w/2;j++){
-			image_out_2.at<uchar>(i,2*j) = image_out.at<uchar>(i,j) + image_out.at<uchar>(i,j+(w/2));
+			image_out_2.at<double>(i,2*j) = image_out.at<double>(i,j) + image_out.at<double>(i,j+(w/2));
 			
-			image_out_2.at<uchar>(i,2*j+1) = image_out.at<uchar>(i,j) -  image_out.at<uchar>(i,j+(w/2));
+			image_out_2.at<double>(i,2*j+1) = image_out.at<double>(i,j) -  image_out.at<double>(i,j+(w/2));
 			
 		}
 	}

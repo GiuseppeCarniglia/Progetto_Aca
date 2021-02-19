@@ -69,16 +69,17 @@ int main(int argc, char* argv[]) {
 			image.at<double>(j+(k/2), i) = (dst.at<double>(2*j,i) - dst.at<double>(2*j+1,i))/2;
 		}
 	}
-	
+        time_serial_start = omp_get_wtime();	
 		k = k/2;
 		w = w/2;	
-
+        time_serial_end = omp_get_wtime();
+        time_serial = time_serial_end - time_serial_start;
 	}
 	
 	final_time = omp_get_wtime();
 	final_time -= initial_time;
 
-	printf("time: %lf \n", final_time);
+	printf("%lf %lf\n", final_time, time_serial);
 
 //Instructions to save the final image on disk 
 /*	vector<int> compression_params;

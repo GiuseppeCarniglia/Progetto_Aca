@@ -70,8 +70,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	double time_serial =0,time_serial_start=0,time_serial_end=0;
-
 	for(int i=0;i<imageHeight;i++){
 		for(int j=0;j<imageWidth;j++){
 			
@@ -190,8 +188,6 @@ int main(int argc, char *argv[])
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<double>(i, (padding[2]<<1) - 4));
 	}
 
-    time_serial_start = omp_get_wtime();
-
 	for(int i=0;i<imageHeight;i++){
 		for(int j=0;j<imageWidth;j++){
 			 tmp_image.at<double>(i,j) = new_image[i][j];
@@ -202,10 +198,6 @@ int main(int argc, char *argv[])
 	padding[0] = (w/2)-2;
 	padding[1] = (w/2)-1;
 	padding[2] = (w/2);
-
-    time_serial_end = omp_get_wtime();
-
-    time_serial += (time_serial_end - time_serial_start);
 
 	//Calculations for matrices AA and DA
 	for (i = 0; i < imageWidth; i++) {
@@ -332,9 +324,9 @@ int main(int argc, char *argv[])
     final_time = omp_get_wtime();
 
 
-    final_time = final_time - initial_time - time_serial;
+    final_time = final_time - initial_time;
     
-    printf("%lf %lf\n", final_time, time_serial);
+    printf("%lf\n", final_time);
 
     //Utili per visualizzare l'immagine ma non per raccogliere i tempi di esecuzione
 	/*

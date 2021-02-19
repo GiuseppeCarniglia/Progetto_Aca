@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 		
 	int w = 0;
 
-	double initial_time = 0, final_time = 0, time_serial = 0, time_serial_start = 0, time_serial_end = 0;
+	double initial_time = 0, final_time = 0;
 	int temp_row = 0;
 	int temp_col = 0;
 
@@ -77,10 +77,7 @@ int main(int argc, char *argv[]) {
     		}
     	}
 
-        time_serial_start = omp_get_wtime();
 	    w = imageHeight;
-        time_serial_end = omp_get_wtime();
-        time_serial += (time_serial_end - time_serial_start);
 
 		for (int i = 0; i < imageHeight / 2; i++) {
 
@@ -107,8 +104,8 @@ int main(int argc, char *argv[]) {
     }
         
 	final_time = omp_get_wtime();
-	final_time -= initial_time - serial_time;
-	printf("%lf %lf\n", final_time,serial_time);
+	final_time -= initial_time;
+	printf("%lf\n", final_time);
 
 	/*printf("time immagini AA e DA: %lf \n", time_DD);
 	

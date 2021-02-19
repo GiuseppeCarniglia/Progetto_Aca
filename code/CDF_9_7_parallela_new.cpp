@@ -294,8 +294,10 @@ int main(int argc, char* argv[])
 			}
 			
         }
-        
-        	#pragma omp parallel for schedule(static)
+       
+
+        time_serial_start = omp_get_wtime();
+        #pragma omp parallel for schedule(static)
 		//Copying of tmp_image_1 and tmp_image_2 in new_image and image for next level. new_image is the cumulative image
 		for(int i = 0;i < imageWidth;i++){
 			for(int j = 0;j < imageHeight/2;j++){
@@ -318,12 +320,15 @@ int main(int argc, char* argv[])
 		padding[2] = (imageWidth / 2);
 		
 		offset = (imageWidth / 2) - 1;
+        
+        time_serial_end = omp_get_wtime();
 
+        time_serial += (time_serial_end - time_serial_start);
         
 	}
         	
 	final_time = omp_get_wtime();
-	final_time -= initial_time - time_serial;
+	final_time -= initial_time;
 	printf("%lf %lf\n", final_time, time_serial);
 	
 /*        

@@ -35,6 +35,7 @@ int main(int argc, char* argv[])
 
 
 	double initial_time = 0, final_time = 0;
+    double time_serial = 0, time_serial_start = 0, time_serial_end = 0;
 	
 	if(image.empty()){
 		perror("Immagine vuota\n");
@@ -43,10 +44,7 @@ int main(int argc, char* argv[])
 
 	int i=0,j=0,offset=(imageWidth/2) - 1;
 
-	double time_A=0,time_D=0,time_AA=0,time_DD=0;
-	
 	initial_time = omp_get_wtime();
-	time_A = omp_get_wtime();
     #pragma omp parallel
     {
 		#pragma omp for private(i,j) schedule(static)
@@ -160,16 +158,18 @@ int main(int argc, char* argv[])
 		}
     }	
     
-    		time_D = omp_get_wtime();
-    		time_D -= time_A; // Execution time of matrices A and D
-    
+        time_serial_start = omp_get_wtime();
+
 		padding[0] = (imageHeight/ 2) - 2;
 		padding[1] = (imageHeight/ 2) - 1;
 		padding[2] = (imageHeight/ 2);
 		
 		offset = (imageHeight/2) - 1;
 		
-		time_AA = omp_get_wtime();
+        time_serial_end = omp_get_wtime();
+
+        time_serial += (time_serial_end - time_serial_start);
+        
         #pragma omp parallel
         {
 		#pragma omp for private(i,j) schedule(static)

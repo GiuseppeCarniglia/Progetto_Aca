@@ -1,0 +1,3 @@
+time 1.151989
+time A e D 0.544875
+time AA e DD 0.607113

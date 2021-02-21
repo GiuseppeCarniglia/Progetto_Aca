@@ -81,20 +81,9 @@ int main(int argc, char* argv[]) {
 
 	printf("%lf %lf\n", final_time, time_serial);
 
-//Instructions to save the final image on disk 
-/*	vector<int> compression_params;
-
-	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
-
-	compression_params.push_back(60);
-
-	imwrite("./immagini_modificate/Haar_parallela/Haar_parallela.jpg",image,compression_params);
-	imwrite("./immagini_modificate/Haar_parallela/Haar_parallela_antitrasformata.jpg",Haar_antitrasformata(image),compression_params);
 	
-	waitKey(0);*/
-	
-	
-	/*cv::Mat final_image(image.rows, image.cols, CV_8UC1);
+/*	
+    cv::Mat final_image(image.rows, image.cols, CV_8UC1);
 	
 	
 	cv::normalize(image, final_image, 0, 255, NORM_MINMAX,CV_8UC1);

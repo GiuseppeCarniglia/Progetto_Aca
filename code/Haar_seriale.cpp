@@ -107,8 +107,7 @@ int main(int argc, char *argv[]) {
 	final_time -= initial_time;
 	printf("%lf\n", final_time);
 
-	/*printf("time immagini AA e DA: %lf \n", time_DD);
-	
+/*	
 	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
 	
 	cv::normalize(image,final_image, 0,255,NORM_MINMAX,CV_8UC1);
@@ -120,28 +119,17 @@ int main(int argc, char *argv[]) {
 	cv::normalize(antitransform,final_image, 0,255,NORM_MINMAX,CV_8UC1);
 	
 	imshow("Haar antitransform serial",final_image);
-	*/
-//	image_difference = diff_of_images(image_original, antitransform);
 
+	image_difference = diff_of_images(image, antitransform);
+
+	cv::normalize(image_difference,final_image, 0,255,NORM_MINMAX,CV_8UC1);
+	
+	imshow("Haar difference",final_image);
+*/
 //	double min, max;
 //	cv::minMaxLoc(image_difference, &min, &max);
 
 //	printf("Image difference\nLowest value:%lf Highest value:%lf\n",min,max);
-
-//Functions to save images on disk
-/*	vector<int> compression_params;
-
-	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
-
-	compression_params.push_back(60);
-
-	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale.jpg",image,compression_params);
-
-	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_antitrasformata.jpg",antitransform,compression_params);
-	imwrite("./immagini_modificate/Haar_seriale/Haar_seriale_differenza.jpg",image_difference,compression_params);
-	
-	imshow("Haar antitransform serial",image_difference);*/
-
 
 	waitKey(0);
 

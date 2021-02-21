@@ -37,8 +37,7 @@ int main(int argc, char *argv[])
 	
 	int imageHeight = image.size().height;
 	int imageWidth = image.size().width;
-//	//Mat new_image = cv::Mat(imageHeight,imageWidth,CV_16C1);
-//	
+
 	double	*row,**new_image;
 	
 	row = (double*)malloc(imageHeight * imageWidth * sizeof(*row));
@@ -62,6 +61,7 @@ int main(int argc, char *argv[])
 	int padding[3] = { (w / 2) - 2 ,(w / 2) - 1 ,(w / 2) };
 	
 	double initial_time = 0, final_time = 0;
+    double serial_time_start = 0, serial_time_end = 0, serial_time = 0;
 	int i=0,j=0,k=0;
 	int nOfLevels = atoi(argv[2]);
 
@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 	initial_time = omp_get_wtime();
     
 	for(k=0;k<nOfLevels;k++){
+
 //	Calculations for matrix A
 	for (i = 0; i < imageHeight; i++) {
 	
@@ -188,6 +189,8 @@ int main(int argc, char *argv[])
 			+ coefficientsHP[4] * (ZERO_VALUE + image.at<double>(i, (padding[2]<<1) - 4));
 	}
 
+    serial_time_start = omp_get_wtime();
+
 	for(int i=0;i<imageHeight;i++){
 		for(int j=0;j<imageWidth;j++){
 			 tmp_image.at<double>(i,j) = new_image[i][j];
@@ -198,6 +201,10 @@ int main(int argc, char *argv[])
 	padding[0] = (w/2)-2;
 	padding[1] = (w/2)-1;
 	padding[2] = (w/2);
+
+    serial_time_end = omp_get_wtime();
+
+    serial_time += (serial_time_end -serial_time_start);
 
 	//Calculations for matrices AA and DA
 	for (i = 0; i < imageWidth; i++) {
@@ -303,7 +310,7 @@ int main(int argc, char *argv[])
 		
 	}
 	
-	
+    serial_time_start = omp_get_wtime();	
 	for(int i=0;i<imageHeight;i++){
 		for(int j=0;j<imageWidth;j++){
 			 image.at<double>(i,j) = new_image[i][j];
@@ -319,6 +326,9 @@ int main(int argc, char *argv[])
 	padding[1] = (w/2)-1;
 	padding[2] = (w/2);
 
+    serial_time_end = omp_get_wtime();
+
+    serial_time += (serial_time_end - serial_time_start);
 	}
 
     final_time = omp_get_wtime();
@@ -326,10 +336,10 @@ int main(int argc, char *argv[])
 
     final_time = final_time - initial_time;
     
-    printf("%lf\n", final_time);
+    printf("%lf %lf\n", final_time, serial_time);
 
     //Utili per visualizzare l'immagine ma non per raccogliere i tempi di esecuzione
-	/*
+/*	
     for(int i=0;i<image.rows;i++){
 		for(int j=0;j<image.cols;j++){
 			 tmp_image.at<double>(i,j) = image.at<double>(i,j);
@@ -341,7 +351,7 @@ int main(int argc, char *argv[])
 			new_image[i][j] = 0.0;
 		}
 	}
-    */
+ */  
 
 				
 
@@ -384,7 +394,7 @@ int main(int argc, char *argv[])
 //		}
 //	}
 //	
-
+    //Resized are used to perform upsampling required for the antitrasnform
 //	cv::resize(upTmp1,upTmp3,Size(),1.0,2.0,INTER_LANCZOS4);
 //	cv::resize(upTmp2,upTmp4,Size(),1.0,2.0,INTER_LANCZOS4);
 //	
@@ -708,35 +718,18 @@ int main(int argc, char *argv[])
 
 //	}
 
-	
-//	printf("time %lf\n", final_time);
-//	printf("time A e D %lf\n", time_D);
-//	printf("time AA e DD %lf\n", time_DD);
-//
+/*	
+    cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
 
+    cv::normalize(tmp_image,final_image,0,255,NORM_MINMAX,CV_8UC1);
 
-//	cv::Mat final_image(imageHeight,imageWidth,CV_8UC1);
-//			
-//	cv::normalize(tmp_image,final_image,0,255,NORM_MINMAX,CV_8UC1);
-//	
-
-//	
-//	namedWindow("Serial CDF 9/7",WINDOW_NORMAL);
-//	if(image.rows >=1920 || image.cols >= 1080){
-//		cv::resizeWindow("Serial CDF 9/7",1920,1080);
-//	}
-//	imshow("Serial CDF 9/7",final_image);
-//	waitKey(0);
-
-//Functions to save image on disk
-//	vector<int> compression_params;
-
-//	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
-
-//	compression_params.push_back(60);
-
-//	imwrite("./immagini_modificate/CDF_9_7_seriale/CDF_9_7_seriale.jpg",final_image,compression_params);
-
+    namedWindow("Serial CDF 9/7",WINDOW_NORMAL);
+    if(image.rows >=1920 || image.cols >= 1080){
+        cv::resizeWindow("Serial CDF 9/7",1920,1080);
+    }
+    imshow("Serial CDF 9/7",final_image);
+    waitKey(0);
+*/
 	free(*new_image);
 	free(new_image);
 
